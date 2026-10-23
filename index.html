@@ -270,7 +270,7 @@ function saveOrder(){
 
 function detail(){
  var o=get(curId);if(!o)return home();var c=calc(o);
- var items=o.items.length?'<h2>المنتجات</h2><div class="card">'+o.items.map(function(i,k){return'<div class="item"><div class="line"><b>'+(k+1)+'. '+esc(i.spec||"منتج")+'</b><span>× '+n(i.qty)+(n(i.priceUsd)>0?' · +'</span></div>'+(i.link?'<div class="link" dir="ltr">'+esc(i.link)+'</div>':"")+'</div>'}).join("")+'</div>':"";
+ var items=o.items.length?'<h2>المنتجات</h2><div class="card">'+o.items.map(function(i,k){return'<div class="item"><div class="line"><b>'+(k+1)+'. '+esc(i.spec||"منتج")+'</b><span>× '+n(i.qty)+(n(i.priceUsd)>0?' · $'+num(i.priceUsd)+' للقطعة':'')+'</span></div>'+(i.link?'<div class="link" dir="ltr">'+esc(i.link)+'</div>':"")+'</div>'}).join("")+'</div>':"";
  var pays=o.pays.length?o.pays.map(function(p,k){return'<div class="line"><span>'+(k+1)+'. '+esc(p.type)+' · '+esc(p.method)+' · '+esc(p.date)+'</span><span><b class="ok-t">'+money(p.amount)+'</b><button class="x" onclick="delPay('+k+')" aria-label="حذف الدفعة">حذف</button></span></div>'}).join(""):'<div class="empty" style="padding:8px">لا توجد دفعات</div>';
  var st=STATUSES.map(function(s){return'<option'+(s===o.status?" selected":"")+'>'+s+'</option>'}).join("");
  return'<button class="back" onclick="go(\'home\')">‹ كل الطلبات</button>'+
