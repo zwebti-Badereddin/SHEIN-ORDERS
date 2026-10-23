@@ -297,10 +297,11 @@ function pr(html,title){var e=document.getElementById("print");e.innerHTML=html;
 function exportAll(){
  var L=visible().sort(function(a,b){return a.no-b.no});
  if(!L.length){alert("لا توجد طلبات لتصديرها");return}
- var T=0,P=0,R=0;
- var rows=L.map(function(o){var c=calc(o);T+=c.tot;P+=c.paid;R+=c.rem;return'<tr><td>'+fno(o)+'</td><td>'+esc(o.name)+'</td><td>'+esc(o.phone||"")+'</td><td>'+esc(o.city||"")+'</td><td>'+esc(o.status)+'</td><td>'+num(c.tot)+'</td><td>'+num(c.paid)+'</td><td>'+num(c.rem)+'</td></tr>'}).join("");
+ var T=0,P=0,R=0,PC=0,PF=0,known=0;
+ var rows=L.map(function(o){var c=calc(o);T+=c.tot;P+=c.paid;R+=c.rem;if(c.purchaseCost!==null)PC+=c.purchaseCost;if(c.profit!==null){PF+=c.profit;known++}
+ return'<tr><td>'+fno(o)+'</td><td>'+esc(o.name)+'</td><td>'+esc(o.phone||"")+'</td><td>'+esc(o.city||"")+'</td><td>'+esc(o.status)+'</td><td>'+num(c.tot)+'</td><td>'+num(c.paid)+'</td><td>'+num(c.rem)+'</td><td>'+(c.purchaseCost===null?"—":num(c.purchaseCost))+'</td><td>'+(c.profit===null?"—":num(c.profit))+'</td></tr>'}).join("");
  var flt=fS==="__unpaid"?" · غير مسددة فقط":(fS?" · الحالة: "+esc(fS):"");
- pr('<div class="rep-logo"><img src="logo.png" alt=""></div><h1>تقرير الطلبات</h1><p>التاريخ: '+today()+' · عدد الطلبات: '+L.length+flt+'</p><table><thead><tr><th>الرقم</th><th>الزبونة</th><th>الهاتف</th><th>المدينة</th><th>الحالة</th><th>الإجمالي</th><th>المدفوع</th><th>المتبقي</th></tr></thead><tbody>'+rows+'</tbody><tfoot><tr><td colspan="5">المجموع ('+esc(D.cur)+')</td><td>'+num(T)+'</td><td>'+num(P)+'</td><td>'+num(R)+'</td></tr></tfoot></table>','تقرير-الطلبات-'+today());
+ pr('<div class="rep-logo"><img src="logo.png" alt=""></div><h1>تقرير الطلبات والحسابات</h1><p>التاريخ: '+today()+' · عدد الطلبات: '+L.length+flt+'</p><table><thead><tr><th>الرقم</th><th>الزبونة</th><th>الهاتف</th><th>المدينة</th><th>الحالة</th><th>سعر البيع</th><th>المقبوض</th><th>المتبقي</th><th>تكلفة SHEIN</th><th>صافي الربح</th></tr></thead><tbody>'+rows+'</tbody><tfoot><tr><td colspan="5">المجموع ('+esc(D.cur)+')</td><td>'+num(T)+'</td><td>'+num(P)+'</td><td>'+num(R)+'</td><td>'+num(PC)+'</td><td>'+(known===L.length?num(PF):"بيانات تكلفة ناقصة")+'</td></tr></tfoot></table><p class="note">صافي الربح محسوب فقط للطلبات التي تتوفر لها بيانات تكلفة. تكلفة SHEIN لا تشمل الشحن الإضافي والوزن والمصاريف الأخرى المعروضة ضمن حساب كل طلب.</p>','تقرير-الطلبات-والحسابات-'+today());
 }
 var STORE={name:"متجر شي إن",en:"SHEIN STORE VARIETY",phone:"0922907857"};
 function stampHtml(){return'<div class="stamp"><b>'+STORE.name+'</b><i>'+STORE.en+'</i><span dir="ltr">'+STORE.phone+'</span><em>هاتف · واتساب</em></div>'}
