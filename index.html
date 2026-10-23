@@ -117,7 +117,7 @@ main,.sync{display:none!important}
 <script>
 var STATUSES=["جديد","تم دفع العربون","تم الطلب من SHEIN","في الشحن","وصل","تم التسليم","مكتمل"];
 var PTYPES=["عربون","دفعة","تسوية"],METHODS=["نقداً","حوالة","بطاقة"];
-var D={orders:[],cur:"د.ل",seq:0},draft=null,view="home",curId=null,fS="",fQ="";
+var D={orders:[],batches:[],cur:"د.ل",seq:0},draft=null,batchDraft=null,view="home",curId=null,fS="",fQ="";
 var KEY="shein_fb_x";
 if(!D.cur||D.cur==="ريال")D.cur="د.ل";
 var cloud={ref:null,busy:false,dirty:false,timer:null,first:false};
@@ -126,11 +126,11 @@ function setSync(k){var e=document.getElementById("sync");if(!e)return;e.textCon
 function save(){D.ts=Date.now();keep();if(cloud.ref){clearTimeout(cloud.timer);setSync("wait");cloud.timer=setTimeout(push,800)}}
 function push(){if(!cloud.ref)return;if(cloud.busy){cloud.dirty=true;return}if(!D.ts)D.ts=Date.now();cloud.busy=true;
  cloud.ref.set({json:JSON.stringify(D),ts:D.ts}).then(function(){setSync("ok")},function(){setSync("err")}).then(function(){cloud.busy=false;if(cloud.dirty){cloud.dirty=false;push()}})}
-function adopt(r){D=r;if(!D.cur)D.cur="د.ل";keep();setSync("ok");if(view!=="form")render()}
+function adopt(r){D=r;if(!D.cur)D.cur="د.ل";if(!Array.isArray(D.batches))D.batches=[];keep();setSync("ok");if(view!=="form")render()}
 function merge(r){var pref=n(D.ts)>n(r.ts)?D:r,oth=pref===D?r:D,map={},sq=Math.max(n(D.seq),n(r.seq));
  oth.orders.forEach(function(o){map[o.id]=o});pref.orders.forEach(function(o){map[o.id]=o});
  var all=Object.keys(map).map(function(k){sq=Math.max(sq,n(map[k].no));return map[k]});
- D={orders:all,cur:pref.cur||"د.ل",seq:sq,rate:pref.rate||oth.rate||"",kgp:pref.kgp||oth.kgp||""};save();if(view!=="form")render()}
+ var bm={};(oth.batches||[]).forEach(function(b){bm[b.id]=b});(pref.batches||[]).forEach(function(b){bm[b.id]=b});D={orders:all,batches:Object.keys(bm).map(function(k){return bm[k]}),cur:pref.cur||"د.ل",seq:sq,rate:pref.rate||oth.rate||"",kgp:pref.kgp||oth.kgp||""};save();if(view!=="form")render()}
 function onSnap(snap){
  if(!snap.exists){cloud.first=true;if(D.orders.length)push();else setSync("ok");return}
  var r;try{r=JSON.parse(snap.data().json)}catch(e){setSync("err");return}
@@ -188,7 +188,7 @@ function si(st){var i=STATUSES.indexOf(st);return i<0?0:i}
 function today(){return new Date().toISOString().slice(0,10)}
 function get(id){return D.orders.filter(function(o){return o.id===id})[0]}
 function go(v,id){view=v;if(id!==undefined)curId=id;render();window.scrollTo(0,0)}
-function render(){var a=document.getElementById("app");a.innerHTML=view==="home"?home():view==="form"?form():detail();if(view==="form")upd()}
+function render(){var a=document.getElementById("app");a.innerHTML=view==="home"?home():view==="form"?form():view==="batches"?batchPage():detail();if(view==="form")upd()}
 
 function home(){
  var act=0,rec=0,t=0,p=0,r=0,pf=0,pAll=0;
@@ -202,7 +202,7 @@ function home(){
  '<div class="kc k2"><div class="kt">'+ic("cash")+'</div><div class="kb"><small>المقبوض</small><b>'+money(pAll)+'</b></div></div>'+
  '<div class="kc k3"><div class="kt">'+ic("box")+'</div><div class="kb"><small>المستلمة</small><b>'+rec+'</b></div></div>'+
  '<div class="kc k4"><div class="kt">'+ic("trend")+'</div><div class="kb"><small>الربح الصافي المتوقع</small><b>'+money(pf)+'</b></div></div></div>'+
- ibox()+'<div class="bar" style="margin-top:14px"><button class="btn" onclick="newOrder()">+ طلب جديد</button><button class="btn sec" onclick="exportAll()">تصدير PDF</button></div>'+
+ ibox()+'<div class="bar" style="margin-top:14px"><button class="btn" onclick="newOrder()">+ طلب جديد</button><button class="btn sec" onclick="go(\'batches\')">تجميع سلة SHEIN</button><button class="btn sec" onclick="exportAll()">تصدير PDF</button></div>'+
  '<div class="row"><input id="q" placeholder="بحث بالاسم أو الهاتف أو رقم الطلب" value="'+esc(fQ)+'" oninput="fQ=this.value;list()"><select onchange="fS=this.value;list()">'+opts+'</select></div>'+
  '<div id="list" style="margin-top:12px">'+listHtml()+'</div>'+
  '<details><summary>النسخة الاحتياطية والإعدادات</summary>'+
@@ -282,7 +282,7 @@ function detail(){
  '<div class="card" style="margin-top:12px">'+(n(o.usd)>0&&n(o.rate)>0?'<div class="line"><span>سعر السلة</span><span>$'+num(o.usd)+' × '+num(o.rate)+' = '+money(n(o.usd)*n(o.rate))+'</span></div>'+(n(o.comm)>0?'<div class="line"><span>العمولة</span><span>'+money(o.comm)+'</span></div>':''):'')+'<div class="line"><span>سعر البيع</span><b>'+money(c.tot)+'</b></div>'+
  '<div class="line"><span>المدفوع</span><span class="ok-t">'+money(c.paid)+'</span></div>'+
  '<div class="line big"><span>المتبقي</span><span class="'+(c.rem>0?"rem-t":"ok-t")+'">'+money(c.rem)+'</span></div>'+
- (c.profit!==null?'<div class="line"><span>التكلفة</span><span>'+money(c.purchaseCost||o.cost||0)+'</span></div>'+(n(o.accountingV)>=2?'<div class="line"><span>خصم كوبون SHEIN</span><span>'+num(o.couponUsd)+' $</span></div><div class="line"><span>قيمة نقاط SHEIN المستخدمة</span><span>'+num(o.pointsUsd)+' $</span></div>':'')+(n(o.coupon)>0?'<div class="line"><span>الكوبون (سجل قديم)</span><span>'+money(o.coupon)+'</span></div>':'')+(n(o.ship)>0?'<div class="line"><span>الشحن الإضافي</span><span>'+money(o.ship)+'</span></div>':'')+(wcost(o)>0?'<div class="line"><span>تكلفة الوزن ('+num(o.kg)+' كجم × '+num(o.kgp)+')</span><span>'+money(wcost(o))+'</span></div>':'')+(n(o.extraCost)>0?'<div class="line"><span>مصاريف أخرى</span><span>'+money(o.extraCost)+'</span></div>':'')+'<div class="line big"><span>الربح الصافي</span><span class="'+(c.profit>=0?'ok-t':'rem-t')+'">'+money(c.profit)+'</span></div>':"")+'</div>'+
+ (c.profit!==null?'<div class="line"><span>التكلفة</span><span>'+money(c.purchaseCost||o.cost||0)+'</span></div>'+(n(o.accountingV)>=2?'<div class="line"><span>حصة خصم الكوبون</span><span>'+num(batchForOrder(o)?batchAllocation(o,batchForOrder(o),"coupon"):o.couponUsd)+' $</span></div><div class="line"><span>حصة نقاط SHEIN</span><span>'+num(batchForOrder(o)?batchAllocation(o,batchForOrder(o),"points"):o.pointsUsd)+' $</span></div>'+(batchForOrder(o)?'<div class="line"><span>عملية الشراء</span><span>'+esc(batchForOrder(o).name)+'</span></div>':''):'')+(n(o.coupon)>0?'<div class="line"><span>الكوبون (سجل قديم)</span><span>'+money(o.coupon)+'</span></div>':'')+(n(o.ship)>0?'<div class="line"><span>الشحن الإضافي</span><span>'+money(o.ship)+'</span></div>':'')+(wcost(o)>0?'<div class="line"><span>تكلفة الوزن ('+num(o.kg)+' كجم × '+num(o.kgp)+')</span><span>'+money(wcost(o))+'</span></div>':'')+(n(o.extraCost)>0?'<div class="line"><span>مصاريف أخرى</span><span>'+money(o.extraCost)+'</span></div>':'')+'<div class="line big"><span>الربح الصافي</span><span class="'+(c.profit>=0?'ok-t':'rem-t')+'">'+money(c.profit)+'</span></div>':"")+'</div>'+
  '<h2>الدفعات</h2><div class="card">'+pays+'</div>'+
  '<div class="card"><div class="row"><div><label style="margin-top:0">المبلغ</label><input id="pa" inputmode="decimal"></div><div><label style="margin-top:0">النوع</label><select id="pt">'+PTYPES.map(function(t){return'<option>'+t+'</option>'}).join("")+'</select></div></div>'+
  '<label>طريقة الدفع</label><select id="pm">'+METHODS.map(function(t){return'<option>'+t+'</option>'}).join("")+'</select>'+
@@ -370,6 +370,7 @@ function wa(){
 document.getElementById("app").innerHTML='<div class="empty">جارٍ التحميل…</div>';
 regSW();
 </script>
+<script src="batch.js"></script>
 </body>
 </html>
 +num(i.priceUsd)+' للقطعة':'')+'</span></div>'+(i.link?'<div class="link" dir="ltr">'+esc(i.link)+'</div>':"")+'</div>'}).join("")+'</div>':"";
