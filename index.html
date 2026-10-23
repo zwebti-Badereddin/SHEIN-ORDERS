@@ -130,7 +130,7 @@ function adopt(r){D=r;if(!D.cur)D.cur="د.ل";if(!Array.isArray(D.batches))D.bat
 function merge(r){var pref=n(D.ts)>n(r.ts)?D:r,oth=pref===D?r:D,map={},sq=Math.max(n(D.seq),n(r.seq));
  oth.orders.forEach(function(o){map[o.id]=o});pref.orders.forEach(function(o){map[o.id]=o});
  var all=Object.keys(map).map(function(k){sq=Math.max(sq,n(map[k].no));return map[k]});
- D={orders:all,cur:pref.cur||"د.ل",seq:sq,rate:pref.rate||oth.rate||"",kgp:pref.kgp||oth.kgp||""};save();if(view!=="form")render()}
+ var bm={};(oth.batches||[]).forEach(function(b){bm[b.id]=b});(pref.batches||[]).forEach(function(b){bm[b.id]=b});D={orders:all,batches:Object.keys(bm).map(function(k){return bm[k]}),cur:pref.cur||"د.ل",seq:sq,rate:pref.rate||oth.rate||"",kgp:pref.kgp||oth.kgp||""};save();if(view!=="form")render()}
 function onSnap(snap){
  if(!snap.exists){cloud.first=true;if(D.orders.length)push();else setSync("ok");return}
  var r;try{r=JSON.parse(snap.data().json)}catch(e){setSync("err");return}
