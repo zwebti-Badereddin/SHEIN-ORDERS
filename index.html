@@ -164,14 +164,14 @@ function n(v){return Number(v)||0}
 function has(v){return v!==undefined&&v!==null&&v!==""}
 function money(v){return (Math.round(n(v)*100)/100).toLocaleString("ar-EG-u-nu-latn")+" "+esc(D.cur)}
 function grossUsd(o){var sum=0,all=(o.items||[]).length>0;(o.items||[]).forEach(function(i){if(!has(i.priceUsd)||n(i.priceUsd)<=0)all=false;else sum+=n(i.qty||1)*n(i.priceUsd)});return all?sum:n(o.usd)}
-function purchaseCost(o){if(n(o.accountingV)>=2){if(has(o.cost)&&n(o.cost)>0)return n(o.cost);return Math.max(0,grossUsd(o)-n(o.couponUsd)-n(o.pointsUsd))*n(o.rate)}return n(o.cost)}
+function purchaseCost(o){if(n(o.accountingV)>=2){if(has(o.cost)&&n(o.cost)>0)return n(o.cost);var gross=grossUsd(o),rate=n(o.rate);if(gross<=0||rate<=0)return null;return Math.max(0,gross-n(o.couponUsd)-n(o.pointsUsd))*rate}return n(o.cost)}
 function calc(o){var tot=0,paid=0;
  if(has(o.price))tot=n(o.price);else{(o.items||[]).forEach(function(i){tot+=n(i.qty)*n(i.price)});tot+=n(o.fee)}
  (o.pays||[]).forEach(function(p){paid+=n(p.amount)});
- var profit=null;
- if(n(o.accountingV)>=2)profit=tot-purchaseCost(o)-n(o.ship)-wcost(o)-n(o.extraCost);
+ var profit=null,pc=purchaseCost(o);
+ if(n(o.accountingV)>=2){if(pc!==null)profit=tot-pc-n(o.ship)-wcost(o)-n(o.extraCost)}
  else if(has(o.cost)||has(o.ship)||has(o.coupon)||wcost(o)>0)profit=tot-n(o.cost)+n(o.coupon)-n(o.ship)-wcost(o);
- return{tot:tot,paid:paid,rem:tot-paid,profit:profit,purchaseCost:purchaseCost(o)}}
+ return{tot:tot,paid:paid,rem:tot-paid,profit:profit,purchaseCost:pc}}
 function wcost(o){return n(o.kg)*n(o.kgp)}
 function fno(o){return"#"+String(o.no).padStart(4,"0")}
 function num(v){return(Math.round(n(v)*100)/100).toLocaleString("ar-EG-u-nu-latn")}
@@ -255,7 +255,7 @@ function delItem(i){draft.items.splice(i,1);document.getElementById("items").inn
 function calcP(){var u=grossUsd(draft),r=n(draft.rate),lc=document.getElementById("lc");
  if(u>0&&r>0){if(lc)lc.value=num(u*r);if(!draft.priceManual){draft.price=Math.round((u*r+n(draft.comm))*100)/100;var pp=document.getElementById("pp");if(pp)pp.value=draft.price}}else if(lc)lc.value="";
  upd()}
-function upd(){var r=document.getElementById("rm");if(r)r.innerHTML=money(n(draft.price)-n(draft.deposit));var w=document.getElementById("wc");if(w)w.innerHTML=money(wcost(draft));var pc=document.getElementById("pc");if(pc)pc.innerHTML=money(purchaseCost(draft));var e=document.getElementById("pf");if(e)e.innerHTML=(has(draft.price)&&(n(draft.accountingV)>=2||has(draft.cost)||has(draft.ship)||has(draft.coupon)||wcost(draft)>0))?money(n(draft.price)-purchaseCost(draft)-n(draft.ship)-wcost(draft)-n(draft.extraCost)):"—"}
+function upd(){var r=document.getElementById("rm");if(r)r.innerHTML=money(n(draft.price)-n(draft.deposit));var w=document.getElementById("wc");if(w)w.innerHTML=money(wcost(draft));var pc=document.getElementById("pc"),pcc=purchaseCost(draft);if(pc)pc.innerHTML=pcc===null?"—":money(pcc);var e=document.getElementById("pf");if(e){var known=n(draft.accountingV)>=2?pcc!==null:(has(draft.cost)||has(draft.ship)||has(draft.coupon)||wcost(draft)>0);e.innerHTML=(has(draft.price)&&known)?money(n(draft.price)-(pcc===null?0:pcc)-n(draft.ship)-wcost(draft)-n(draft.extraCost)):"—"}}
 function saveOrder(){
  if(!draft.name.trim()){alert("اكتب اسم الزبونة");return}
  if(n(draft.price)<=0){alert("اكتب سعر البيع للزبونة");return}
