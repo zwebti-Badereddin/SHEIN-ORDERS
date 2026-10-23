@@ -163,7 +163,7 @@ function esc(t){return String(t==null?"":t).replace(/[&<>"]/g,function(c){return
 function n(v){return Number(v)||0}
 function has(v){return v!==undefined&&v!==null&&v!==""}
 function money(v){return (Math.round(n(v)*100)/100).toLocaleString("ar-EG-u-nu-latn")+" "+esc(D.cur)}
-function grossUsd(o){var sum=0,found=false;(o.items||[]).forEach(function(i){if(has(i.priceUsd)&&n(i.priceUsd)>0){sum+=n(i.qty||1)*n(i.priceUsd);found=true}});return found?sum:n(o.usd)}
+function grossUsd(o){var sum=0,all=(o.items||[]).length>0;(o.items||[]).forEach(function(i){if(!has(i.priceUsd)||n(i.priceUsd)<=0)all=false;else sum+=n(i.qty||1)*n(i.priceUsd)});return all?sum:n(o.usd)}
 function purchaseCost(o){if(n(o.accountingV)>=2){if(has(o.cost)&&n(o.cost)>0)return n(o.cost);return Math.max(0,grossUsd(o)-n(o.couponUsd)-n(o.pointsUsd))*n(o.rate)}return n(o.cost)}
 function calc(o){var tot=0,paid=0;
  if(has(o.price))tot=n(o.price);else{(o.items||[]).forEach(function(i){tot+=n(i.qty)*n(i.price)});tot+=n(o.fee)}
@@ -262,7 +262,7 @@ function saveOrder(){
  if(!draft.id&&n(draft.deposit)>n(draft.price)){alert("العربون أكبر من سعر البيع");return}
  if(n(draft.rate)>0)D.rate=draft.rate;
  if(n(draft.kgp)>0)D.kgp=draft.kgp;
- draft.items=draft.items.filter(function(i){return i.link||i.spec});
+ draft.items=draft.items.filter(function(i){return i.link||i.spec||n(i.priceUsd)>0});
  if(!draft.id){D.seq=(D.seq||D.orders.length)+1;draft.id="o"+Date.now();draft.no=D.seq;draft.date=today();if(n(draft.deposit)>0){draft.pays.push({amount:n(draft.deposit),type:"عربون",method:draft.method||METHODS[0],date:today()});draft.status=STATUSES[1]}delete draft.deposit;delete draft.method;D.orders.push(draft)}
  else{D.orders=D.orders.map(function(o){return o.id===draft.id?draft:o})}
  save();go("detail",draft.id);
