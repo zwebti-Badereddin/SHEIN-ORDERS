@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>طلبات شي إن</title>
 <link rel="manifest" href="manifest.webmanifest">
-<meta name="theme-color" content="#f7f6f9">
-<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#16151a">
+<meta name="theme-color" content="#f4f6f9">
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#11151c">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" href="icon-192.png">
 <meta name="mobile-web-app-capable" content="yes">
@@ -15,14 +15,15 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap">
 <style>
-/* الألوان مأخوذة من شعار المتجر: برقوقي للهوية، فيروزي للمسدَّد، كهرماني للمتبقي */
-:root{--bg:#f7f6f9;--card:#fff;--ink:#23262d;--mut:#6a6f7a;--line:#e6e4ea;--soft:#f1eff4;
---acc:#8e2763;--acc-ink:#fff;--acc-soft:#f6e9f0;--ok:#1f7f77;--okbg:#e3f3f1;--warn:#a35b00;--warnbg:#fbefdc;--bad:#b42335;--badbg:#fbe8ea;
---hero:#8e2763;--hero-ink:#fff;--fill:#7fe0d5;
---t0:#5a5f6b;--t0b:#eeedf1;--t1:#a35b00;--t1b:#fbefdc;--t2:#8e2763;--t2b:#f6e9f0;--t3:#1f7f77;--t3b:#e3f3f1;
+/* أساس محايد وأزرق للأزرار، وكل مؤشر وحالة بلون خاص: أخضر للمسدَّد وكهرماني للمتبقي */
+:root{--bg:#f4f6f9;--card:#fff;--ink:#1e2633;--mut:#667085;--line:#e3e7ee;--soft:#eef1f6;
+--acc:#2457c5;--acc-ink:#fff;--acc-soft:#e6edfb;--ok:#12806b;--okbg:#e2f4ef;--warn:#b4620b;--warnbg:#fdf0dc;--bad:#c2343f;--badbg:#fce8ea;
+--hero:#1b2a4a;--hero-ink:#fff;--fill:#4fd1b5;
+--k1:#2457c5;--k1b:#e6edfb;--k2:#7048c8;--k2b:#efe9fb;--k3:#12806b;--k3b:#e2f4ef;--k4:#b4620b;--k4b:#fdf0dc;
+--t0:#5b6475;--t0b:#eceff4;--t1:#b4620b;--t1b:#fdf0dc;--t2:#7048c8;--t2b:#efe9fb;--t3:#2457c5;--t3b:#e6edfb;--t4:#0e7f9a;--t4b:#e0f3f8;--t5:#12806b;--t5b:#e2f4ef;
 color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#16151a;--card:#201e25;--ink:#eceaf0;--mut:#a19dab;--line:#322f39;--soft:#29262f;--acc:#e78bbe;--acc-ink:#2a0f1f;--acc-soft:#3a2231;--ok:#6bcdc2;--okbg:#173330;--warn:#f2b55c;--warnbg:#3a2a12;--bad:#ff8f9c;--badbg:#3d1d23;--hero:#5e1a42;--hero-ink:#fbeef5;--fill:#6bcdc2;--t0:#b7b3c0;--t0b:#2c2932;--t1:#f2b55c;--t1b:#3a2a12;--t2:#e78bbe;--t2b:#3a2231;--t3:#6bcdc2;--t3b:#173330;color-scheme:dark}}
-:root[data-theme="dark"]{--bg:#16151a;--card:#201e25;--ink:#eceaf0;--mut:#a19dab;--line:#322f39;--soft:#29262f;--acc:#e78bbe;--acc-ink:#2a0f1f;--acc-soft:#3a2231;--ok:#6bcdc2;--okbg:#173330;--warn:#f2b55c;--warnbg:#3a2a12;--bad:#ff8f9c;--badbg:#3d1d23;--hero:#5e1a42;--hero-ink:#fbeef5;--fill:#6bcdc2;--t0:#b7b3c0;--t0b:#2c2932;--t1:#f2b55c;--t1b:#3a2a12;--t2:#e78bbe;--t2b:#3a2231;--t3:#6bcdc2;--t3b:#173330;color-scheme:dark}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#11151c;--card:#1a2029;--ink:#e7ebf2;--mut:#9aa3b2;--line:#2a313d;--soft:#222935;--acc:#7ea6ff;--acc-ink:#0d1626;--acc-soft:#1d2a44;--ok:#5fd4b6;--okbg:#14322b;--warn:#f3b25e;--warnbg:#3a2a12;--bad:#ff8a93;--badbg:#3d1d22;--hero:#1e3058;--hero-ink:#eef3ff;--fill:#5fd4b6;--k1:#7ea6ff;--k1b:#1d2a44;--k2:#b59cff;--k2b:#2b2342;--k3:#5fd4b6;--k3b:#14322b;--k4:#f3b25e;--k4b:#3a2a12;--t0:#b3bbc8;--t0b:#262d39;--t1:#f3b25e;--t1b:#3a2a12;--t2:#b59cff;--t2b:#2b2342;--t3:#7ea6ff;--t3b:#1d2a44;--t4:#6fd0e6;--t4b:#15303a;--t5:#5fd4b6;--t5b:#14322b;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#11151c;--card:#1a2029;--ink:#e7ebf2;--mut:#9aa3b2;--line:#2a313d;--soft:#222935;--acc:#7ea6ff;--acc-ink:#0d1626;--acc-soft:#1d2a44;--ok:#5fd4b6;--okbg:#14322b;--warn:#f3b25e;--warnbg:#3a2a12;--bad:#ff8a93;--badbg:#3d1d22;--hero:#1e3058;--hero-ink:#eef3ff;--fill:#5fd4b6;--k1:#7ea6ff;--k1b:#1d2a44;--k2:#b59cff;--k2b:#2b2342;--k3:#5fd4b6;--k3b:#14322b;--k4:#f3b25e;--k4b:#3a2a12;--t0:#b3bbc8;--t0b:#262d39;--t1:#f3b25e;--t1b:#3a2a12;--t2:#b59cff;--t2b:#2b2342;--t3:#7ea6ff;--t3b:#1d2a44;--t4:#6fd0e6;--t4b:#15303a;--t5:#5fd4b6;--t5b:#14322b;color-scheme:dark}
 html{scroll-padding-top:env(safe-area-inset-top,0px);-webkit-text-size-adjust:100%}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:"IBM Plex Sans Arabic",Tahoma,Arial,sans-serif;font-size:15px;line-height:1.6;font-variant-numeric:tabular-nums;-webkit-font-smoothing:antialiased}
@@ -46,12 +47,16 @@ h2{font-size:15px;font-weight:600;margin:24px 0 8px;color:var(--mut)}
 .meter i{display:block;height:100%;background:var(--fill);border-radius:99px}
 .bal em{display:flex;justify-content:space-between;font-style:normal;font-size:13px;opacity:.85;margin-top:8px}
 .stats{display:grid;grid-template-columns:1fr 1fr;background:var(--card);border:1px solid var(--line);border-radius:18px;margin-top:10px;overflow:hidden}
-.stats div{padding:12px 16px;min-width:0}
-.stats div:nth-child(odd){border-inline-end:1px solid var(--line)}
-.stats div:nth-child(-n+2){border-bottom:1px solid var(--line)}
-.stats small{display:block;color:var(--mut);font-size:13px}
-.stats b{display:block;font-size:18px;font-weight:700;line-height:1.4}
+.stats>div{padding:12px 14px;min-width:0;display:flex;gap:10px;align-items:center}
+.stats .si{width:36px;height:36px;border-radius:10px;background:var(--kb);color:var(--k);display:grid;place-items:center;flex:none}.stats .si .ic{width:19px;height:19px}
+.stats .sv{min-width:0}
+.k1{--k:var(--k1);--kb:var(--k1b)}.k2{--k:var(--k2);--kb:var(--k2b)}.k3{--k:var(--k3);--kb:var(--k3b)}.k4{--k:var(--k4);--kb:var(--k4b)}
+.stats>div:nth-child(odd){border-inline-end:1px solid var(--line)}
+.stats>div:nth-child(-n+2){border-bottom:1px solid var(--line)}
+.stats small{display:block;color:var(--mut);font-size:12.5px}
+.stats b{display:block;font-size:17px;font-weight:700;line-height:1.4}
 .stats b.ok-t{color:var(--ok)}
+.stats b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 /* الحقول والأزرار */
 input,select,textarea,button{font:inherit;color:inherit}
 input,select,textarea{width:100%;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px;min-height:46px;transition:border-color .15s}
@@ -69,14 +74,14 @@ label{display:block;font-size:13.5px;color:var(--mut);margin:14px 0 5px}
 .btn.bad{background:var(--card);color:var(--bad);border-color:var(--line)}
 .btn.full{width:100%}
 .bar{display:flex;gap:8px;margin:14px 0}.bar>.btn{flex:1}
-/* حالات الطلب: أربع درجات فقط بدل سبعة ألوان */
-.s0{--st:var(--t0);--stb:var(--t0b)}.s1{--st:var(--t1);--stb:var(--t1b)}.s2,.s3,.s4{--st:var(--t2);--stb:var(--t2b)}.s5,.s6{--st:var(--t3);--stb:var(--t3b)}
+/* لكل مرحلة لون يميّزها، والتسليم والاكتمال بالأخضر */
+.s0{--st:var(--t0);--stb:var(--t0b)}.s1{--st:var(--t1);--stb:var(--t1b)}.s2{--st:var(--t2);--stb:var(--t2b)}.s3{--st:var(--t3);--stb:var(--t3b)}.s4{--st:var(--t4);--stb:var(--t4b)}.s5,.s6{--st:var(--t5);--stb:var(--t5b)}
 .badge{display:inline-flex;align-items:center;gap:6px;background:var(--stb,var(--soft));color:var(--st,var(--ink));border-radius:99px;padding:2px 10px;font-size:12.5px;font-weight:600;white-space:nowrap}
 .badge:before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
 /* قائمة الطلبات: سطح واحد مقسّم بخطوط رفيعة */
 #list{background:var(--card);border:1px solid var(--line);border-radius:18px;overflow:hidden}
 #list:has(.empty){background:none;border-style:dashed}
-.order{display:block;width:100%;text-align:right;background:none;border:0;border-bottom:1px solid var(--line);padding:13px 16px;cursor:pointer}
+.order{display:block;width:100%;text-align:right;background:none;border:0;border-bottom:1px solid var(--line);border-inline-start:3px solid var(--st,var(--line));padding:13px 16px 13px 16px;cursor:pointer}
 .order:last-child{border-bottom:0}
 .order:hover{background:var(--soft)}
 .order .l1{display:flex;justify-content:space-between;gap:10px;align-items:center}
@@ -119,18 +124,18 @@ main,.sync{display:none!important}
 #print{display:block;direction:rtl;font-family:"IBM Plex Sans Arabic",Tahoma,Arial,sans-serif;color:#23262d;background:#fff;font-size:13px}
 #print h1{font-size:20px;margin:0 0 6px}#print h2{font-size:15px;margin:16px 0 6px}#print p{margin:3px 0}
 #print table{width:100%;border-collapse:collapse;margin-top:8px}
-#print th,#print td{border:1px solid #d8d4dc;padding:6px 8px;text-align:right}
-#print th,#print tfoot td{background:#f4ecf1;font-weight:700;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+#print th,#print td{border:1px solid #d3d9e3;padding:6px 8px;text-align:right}
+#print th,#print tfoot td{background:#e8edf6;font-weight:700;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 #print .sum td:first-child{width:40%;font-weight:700}
-.inv-head{display:flex;justify-content:space-between;align-items:center;gap:16px;border-bottom:2px solid #8e2763;padding-bottom:10px;margin-bottom:12px}
+.inv-head{display:flex;justify-content:space-between;align-items:center;gap:16px;border-bottom:2px solid #1b2a4a;padding-bottom:10px;margin-bottom:12px}
 .inv-head img{height:120px;width:auto}
-.inv-meta{border:1px solid #d8d4dc;border-radius:10px;padding:8px 16px;text-align:center;line-height:1.9;min-width:190px}
-.inv-t{font-size:22px;font-weight:700;color:#8e2763}
-.inv-cust{border:1px solid #d8d4dc;border-radius:10px;padding:8px 14px;margin:10px 0;line-height:1.9}
+.inv-meta{border:1px solid #d3d9e3;border-radius:10px;padding:8px 16px;text-align:center;line-height:1.9;min-width:190px}
+.inv-t{font-size:22px;font-weight:700;color:#1b2a4a}
+.inv-cust{border:1px solid #d3d9e3;border-radius:10px;padding:8px 14px;margin:10px 0;line-height:1.9}
 .rep-logo img{height:80px;width:auto;margin-bottom:6px}
 .note{font-size:12px;color:#555}
-.inv-foot{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;margin-top:30px;border-top:1px solid #d8d4dc;padding-top:14px;break-inside:avoid}
-.stamp{width:150px;height:150px;border:3px double #8e2763;border-radius:50%;color:#8e2763;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;transform:rotate(-8deg);box-shadow:inset 0 0 0 5px #fff,inset 0 0 0 6px #8e2763;line-height:1.35;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.inv-foot{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;margin-top:30px;border-top:1px solid #d3d9e3;padding-top:14px;break-inside:avoid}
+.stamp{width:150px;height:150px;border:3px double #1b2a4a;border-radius:50%;color:#1b2a4a;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;transform:rotate(-8deg);box-shadow:inset 0 0 0 5px #fff,inset 0 0 0 6px #1b2a4a;line-height:1.35;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 .stamp b{font-size:18px}.stamp i{font-style:normal;font-size:9px;letter-spacing:.5px}.stamp span{font-size:14px;font-weight:700;margin-top:3px}.stamp em{font-style:normal;font-size:10px}
 }
 </style>
@@ -179,7 +184,7 @@ var FB={apiKey:"AIzaSyCQW9FWYX9gZhCOzKZWHfgPIcckK7dE5XE",authDomain:"shein-order
 firebase.initializeApp(FB);
 var auth=firebase.auth(),fdb=firebase.firestore(),unsub=null;
 function authErr(c){var m={"auth/invalid-credential":"البريد أو كلمة المرور غير صحيحة","auth/wrong-password":"البريد أو كلمة المرور غير صحيحة","auth/user-not-found":"البريد أو كلمة المرور غير صحيحة","auth/invalid-email":"البريد الإلكتروني غير صالح","auth/too-many-requests":"محاولات كثيرة، حاول لاحقاً","auth/network-request-failed":"تعذّر الاتصال بالإنترنت"};return m[c]||"تعذّر تسجيل الدخول"}
-function loginHtml(msg){return'<div class="hero"><div class="hero-top">شي إن ستور</div><div class="hero-lab">سجّلي الدخول لعرض الطلبات</div></div><label>البريد الإلكتروني</label><input id="em" type="email" dir="ltr" autocomplete="username"><label>كلمة المرور</label><input id="pw" type="password" dir="ltr" autocomplete="current-password" onkeydown="if(event.key===\'Enter\')doLogin()">'+(msg?'<div class="card" style="margin-top:12px;color:var(--warn)">'+esc(msg)+'</div>':"")+'<div class="bar"><button class="btn" onclick="doLogin()">دخول</button></div>'+ibox()}
+function loginHtml(msg){return'<div class="hero"><div class="hero-top">شي إن ستور</div><div class="hero-lab">سجّل الدخول لعرض الطلبات</div></div><label>البريد الإلكتروني</label><input id="em" type="email" dir="ltr" autocomplete="username"><label>كلمة المرور</label><input id="pw" type="password" dir="ltr" autocomplete="current-password" onkeydown="if(event.key===\'Enter\')doLogin()">'+(msg?'<div class="card" style="margin-top:12px;color:var(--warn)">'+esc(msg)+'</div>':"")+'<div class="bar"><button class="btn" onclick="doLogin()">دخول</button></div>'+ibox()}
 function showLogin(msg){setSync("");document.getElementById("app").innerHTML=loginHtml(msg)}
 function doLogin(){var e=document.getElementById("em").value.trim(),p=document.getElementById("pw").value;if(!e||!p){showLogin("اكتب البريد وكلمة المرور");return}auth.signInWithEmailAndPassword(e,p).catch(function(er){showLogin(authErr(er.code))})}
 function doLogout(){if(!confirm("تسجيل الخروج؟ ستُحذف نسخة البيانات من هذا الجهاز بعد رفعها إلى الحساب."))return;
@@ -228,7 +233,7 @@ function home(){
  var opts='<option value="">كل الحالات</option><option value="__unpaid"'+(fS==="__unpaid"?" selected":"")+'>غير مسددة فقط</option>'+STATUSES.map(function(s){return'<option'+(s===fS?" selected":"")+'>'+s+'</option>'}).join("");
  return'<div class="head"><div class="logo">'+ic("bag")+'</div><div class="ht"><b>شي إن ستور</b><small>طلبات الزبائن والدفعات</small></div><button class="out" onclick="doLogout()">خروج</button></div>'+
  '<div class="bal"><small>المتبقي عند الزبائن</small><b>'+num(r)+'<span>'+esc(D.cur)+'</span></b><div class="meter"><i style="width:'+pct+'%"></i></div><em><span>حُصّل '+pct+'%</span><span>من '+money(t)+'</span></em></div>'+
- '<div class="stats"><div><small>طلبات جارية</small><b>'+act+'</b></div><div><small>طلبات مستلمة</small><b>'+rec+'</b></div><div><small>المقبوض</small><b>'+money(pAll)+'</b></div><div><small>الربح المتوقع</small><b class="ok-t">'+money(pf)+'</b></div></div>'+
+ '<div class="stats"><div class="k1"><span class="si">'+ic("bag")+'</span><span class="sv"><small>طلبات جارية</small><b>'+act+'</b></span></div><div class="k2"><span class="si">'+ic("box")+'</span><span class="sv"><small>طلبات مستلمة</small><b>'+rec+'</b></span></div><div class="k4"><span class="si">'+ic("cash")+'</span><span class="sv"><small>المقبوض</small><b>'+money(pAll)+'</b></span></div><div class="k3"><span class="si">'+ic("trend")+'</span><span class="sv"><small>الربح المتوقع</small><b class="ok-t">'+money(pf)+'</b></span></div></div>'+
  ibox()+'<div class="bar" style="margin-top:16px"><button class="btn" onclick="newOrder()">طلب جديد</button><button class="btn sec" onclick="go(\'batches\')">تجميع سلة</button><button class="btn sec" onclick="exportAll()">تقرير PDF</button></div>'+
  '<div class="row"><input id="q" placeholder="بحث بالاسم أو الهاتف" aria-label="بحث بالاسم أو الهاتف أو رقم الطلب" value="'+esc(fQ)+'" oninput="fQ=this.value;list()"><select onchange="fS=this.value;list()">'+opts+'</select></div>'+
  '<div id="list" style="margin-top:10px">'+listHtml()+'</div>'+
@@ -243,7 +248,7 @@ function home(){
 function visible(){var q=fQ.trim().toLowerCase();return D.orders.filter(function(o){return(!fS||(fS==="__unpaid"?calc(o).rem>0:o.status===fS))&&(!q||(o.name+" "+o.phone+" "+(o.sheinNo||"")+" "+fno(o)+" "+(o.city||"")).toLowerCase().indexOf(q)>-1)})}
 function listHtml(){
  var L=visible().sort(function(a,b){return b.no-a.no});
- if(!L.length)return'<div class="empty">'+(D.orders.length?"لا توجد نتائج":"لا توجد طلبات بعد. سجّلي أول سلة من زر «طلب جديد».")+'</div>';
+ if(!L.length)return'<div class="empty">'+(D.orders.length?"لا توجد نتائج":"لا توجد طلبات بعد. سجّل أول سلة من زر «طلب جديد».")+'</div>';
  return L.map(function(o){var c=calc(o);return'<button class="order s'+si(o.status)+'" onclick="go(\'detail\',\''+o.id+'\')"><div class="l1"><b>'+esc(o.name)+(o.city?'<span class="city">، '+esc(o.city)+'</span>':"")+'</b><span class="badge s'+si(o.status)+'">'+esc(o.status)+'</span></div><div class="l2"><span><span class="no">'+fno(o)+'</span>&ensp;'+money(c.tot)+'</span><span class="'+(c.rem>0?"rem-t":"ok-t")+'">'+(c.rem>0?"متبقي "+money(c.rem):"مسدد")+'</span></div></button>'}).join("");
 }
 function list(){document.getElementById("list").innerHTML=listHtml()}
