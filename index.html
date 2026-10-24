@@ -250,6 +250,7 @@ function home(){
  '<details><summary>الإعدادات والنسخة الاحتياطية</summary>'+
  '<label>العملة</label><input value="'+esc(D.cur)+'" onchange="D.cur=this.value;save();render()">'+
  '<label>سعر الصرف الافتراضي (دينار لكل $1)</label><input inputmode="decimal" value="'+esc(D.rate||"")+'" onchange="D.rate=this.value;save()">'+
+ '<label>سعر الشحن لكل كيلو ($)</label><input inputmode="decimal" value="'+esc(has(D.kgUsd)?D.kgUsd:"5.5")+'" onchange="D.kgUsd=this.value;save()">'+
  '<label>نسخة احتياطية يدوية اختيارية: انسخ النص أدناه واحتفظ به، أو الصقه هنا لاستعادته.</label>'+
  '<textarea id="bk" dir="ltr">'+esc(JSON.stringify(D))+'</textarea>'+
  '<div class="bar"><button class="btn sec" onclick="copyBk()">نسخ</button><button class="btn sec" onclick="restoreBk()">استعادة من النص</button></div></details>';
@@ -264,7 +265,7 @@ function list(){document.getElementById("list").innerHTML=listHtml()}
 function copyBk(){var t=document.getElementById("bk");t.select();try{navigator.clipboard.writeText(t.value)}catch(e){try{document.execCommand("copy")}catch(e2){}}alert("تم النسخ")}
 function restoreBk(){try{var d=JSON.parse(document.getElementById("bk").value);if(!Array.isArray(d.orders))throw 0;if(!Array.isArray(d.batches))d.batches=[];if(!d.del)d.del={};if(confirm("سيتم استبدال البيانات الحالية. متابعة؟")){D=d;save();render()}}catch(e){alert("النص غير صالح")}}
 
-function newOrder(){draft={id:"",accountingV:3,name:"",phone:"",cart:"",sheinNo:"",city:"",address:"",bookDate:today(),pcs:"",usd:"",actualUsd:"",rate:D.rate||"",shipUsd:"",shipFee:"",price:"",deposit:"",method:METHODS[0],status:STATUSES[0],notes:"",items:[],pays:[]};go("form")}
+function newOrder(){draft={id:"",accountingV:3,name:"",phone:"",cart:"",sheinNo:"",city:"",address:"",bookDate:today(),pcs:"",usd:"",actualUsd:"",rate:D.rate||"",kg:"",kgUsd:has(D.kgUsd)?D.kgUsd:"5.5",shipUsd:"",shipFee:"",shipCo:"",price:"",deposit:"",method:METHODS[0],status:STATUSES[0],notes:"",items:[],pays:[]};go("form")}
 function form(){
  var d=draft;
  return'<button class="back" onclick="go(\''+(d.id?"detail":"home")+'\')">‹ رجوع</button><h1>'+(d.id?"تعديل الطلب":"سلة جديدة")+'</h1>'+
@@ -282,15 +283,17 @@ function form(){
  '<div class="bar"><button class="btn" onclick="saveOrder()">حفظ الطلب</button></div>';
 }
 function acctForm(d){var b=batchForOrder(d),ip=(d.items||[]).length?pieces(Object.assign({},d,{pcs:""})):"";
- function f(lab,key,extra){return'<div><label>'+lab+'</label><input inputmode="decimal" value="'+esc(d[key])+'" oninput="draft.'+key+'=this.value;calcP()"'+(extra||"")+'></div>'}
+ function f(lab,key,extra,fn){return'<div><label>'+lab+'</label><input id="f_'+key+'" inputmode="decimal" value="'+esc(d[key]==null?"":d[key])+'" oninput="draft.'+key+'=this.value;'+(fn||"calcP")+'()"'+(extra||"")+'></div>'}
  function ro(lab,id){return'<div><label>'+lab+'</label><input id="'+id+'" readonly tabindex="-1"></div>'}
  return'<h2>حساب الطلب</h2>'+
  '<div class="row"><div><label>تاريخ الحجز</label><input type="date" value="'+esc(d.bookDate||"")+'" oninput="draft.bookDate=this.value"></div><div><label>إجمالي عدد المنتجات</label><input inputmode="numeric" value="'+esc(d.pcs||"")+'"'+(ip?' placeholder="'+ip+'"':'')+' oninput="draft.pcs=this.value"></div></div>'+
  '<div class="row">'+f("سعر الشراء من الموقع ($)","usd",grossUsd(Object.assign({},d,{usd:""}))>0?' placeholder="'+num(grossUsd(Object.assign({},d,{usd:""})))+'"':'')+
  (b?'<div><label>تكلفة الشراء الفعلية ($)</label><input id="a_act" readonly tabindex="-1" title="محسوبة من عملية الشراء '+esc(b.name)+'"></div>':f("تكلفة الشراء الفعلية ($)","actualUsd"))+'</div>'+
  '<div class="row">'+f("سعر الصرف اليوم","rate")+ro("قيمة المشتريات بالدينار","a_purch")+'</div>'+
- '<div class="row">'+f("التكلفة الفعلية للشحن ($)","shipUsd")+ro("تكلفة الشحن بالدينار","a_shipL")+'</div>'+
- '<div class="row">'+f("رسوم الشحن على الزبون ("+esc(D.cur)+")","shipFee")+ro("تكلفة الشحن على الشركة","a_shipCo")+'</div>'+
+ '<div class="row">'+f("سعر الشحن لكل كيلو ($)","kgUsd","","shipAuto")+ro("سعر الكيلو بالدينار","a_kgL")+'</div>'+
+ '<div class="row">'+f("الوزن (كجم)","kg","","shipAuto")+f("التكلفة الفعلية للشحن ($)","shipUsd")+'</div>'+
+ '<div class="row">'+ro("تكلفة الشحن بالدينار","a_shipL")+'</div>'+
+ '<div class="row">'+f("رسوم الشحن على الزبون ("+esc(D.cur)+")","shipFee")+f("تكلفة الشحن على الشركة ("+esc(D.cur)+")","shipCo")+'</div>'+
  (b?'<p class="note">تكلفة الشراء الفعلية محسوبة من عملية الشراء «'+esc(b.name)+'» بعد توزيع الكوبون والنقاط.</p>':'')+
  '<label>سعر البيع للزبون ('+esc(D.cur)+')</label><input id="pp" inputmode="decimal" value="'+esc(d.price)+'" placeholder="قيمة المشتريات + رسوم الشحن" oninput="draft.price=this.value;draft.priceManual=true;upd()">'}
 function itemsHtml(){return draft.items.length?draft.items.map(function(it,i){return'<div class="card"><label style="margin-top:0">رابط المنتج</label><input dir="ltr" value="'+esc(it.link)+'" oninput="draft.items['+i+'].link=this.value">'+
@@ -299,11 +302,13 @@ function itemsHtml(){return draft.items.length?draft.items.map(function(it,i){re
  '<button class="x" onclick="delItem('+i+')">حذف المنتج</button></div>'}).join(""):'<div class="empty" style="padding:8px">أدخل سعر السلة الإجمالي أو أضف المنتجات وأسعارها بالدولار.</div>'}
 function addItem(){draft.items.push({link:"",spec:"",qty:1,priceUsd:""});document.getElementById("items").innerHTML=itemsHtml();calcP()}
 function delItem(i){draft.items.splice(i,1);document.getElementById("items").innerHTML=itemsHtml();calcP()}
+// الوزن × سعر الكيلو يملأ التكلفة الفعلية للشحن تلقائياً، ويمكن تعديلها بعد ذلك
+function shipAuto(){if(n(draft.kg)>0&&n(draft.kgUsd)>0){draft.shipUsd=Math.round(n(draft.kg)*n(draft.kgUsd)*100)/100;var e=document.getElementById("f_shipUsd");if(e)e.value=draft.shipUsd}calcP()}
 function calcP(){var A=acct(draft);
  if(!draft.priceManual){if(A.site>0&&A.rate>0){draft.price=Math.round((A.purch+A.fee)*100)/100}else draft.price="";var pp=document.getElementById("pp");if(pp)pp.value=draft.price}
  upd()}
 function upd(){var A=acct(draft),c=calc(draft),set=function(id,v){var e=document.getElementById(id);if(e){if("value" in e&&e.tagName==="INPUT")e.value=v;else e.innerHTML=v}};
- set("a_purch",A.purch>0?num(A.purch):"");set("a_shipL",A.shipLyd>0?num(A.shipLyd):"");set("a_shipCo",(A.shipLyd>0||A.fee>0)?num(A.shipCo):"");set("a_act",A.actual===null?"":num(A.actual));
+ set("a_purch",A.purch>0?num(A.purch):"");set("a_shipL",A.shipLyd>0?num(A.shipLyd):"");set("a_kgL",A.kgLyd>0?num(A.kgLyd):"");set("a_act",A.actual===null?"":num(A.actual));
  set("rm",money(n(draft.price)-n(draft.deposit)));
  var e=document.getElementById("pf");if(e){e.innerHTML=c.profit===null?"—":money(c.profit);e.className=c.profit===null?"":c.profit>=0?"ok-t":"rem-t"}}
 function saveOrder(){
@@ -405,11 +410,13 @@ function addPay(){var a=n(document.getElementById("pa").value);if(a<=0){alert("�
  save();render()}
 function fillRem(){var c=calc(get(curId));if(c.rem<=0)return;document.getElementById("pa").value=c.rem;document.getElementById("pt").value="تسوية"}
 function delPay(k){if(confirm("حذف هذه الدفعة؟")){var o=get(curId);o.pays.splice(k,1);touch(o);save();render()}}
-function editOrder(){var o=get(curId);draft=JSON.parse(JSON.stringify(o));if(!has(draft.price))draft.price=calc(o).tot;if(draft.cart===undefined)draft.cart="";if(draft.sheinNo===undefined)draft.sheinNo="";if(draft.cost===undefined)draft.cost="";if(draft.ship===undefined)draft.ship="";if(draft.coupon===undefined)draft.coupon="";if(draft.couponUsd===undefined)draft.couponUsd="";if(draft.pointsUsd===undefined)draft.pointsUsd="";if(draft.extraCost===undefined)draft.extraCost="";if(draft.accountingV===undefined)draft.accountingV=1;if(draft.kg===undefined)draft.kg="";if(draft.kgp===undefined)draft.kgp=D.kgp||"";if(draft.usd===undefined)draft.usd="";if(draft.comm===undefined)draft.comm="";if(draft.rate===undefined)draft.rate=D.rate||"";if(!isV3(draft))toV3(draft,o);go("form")}
+function editOrder(){var o=get(curId);draft=JSON.parse(JSON.stringify(o));if(!has(draft.price))draft.price=calc(o).tot;if(draft.cart===undefined)draft.cart="";if(draft.sheinNo===undefined)draft.sheinNo="";if(draft.cost===undefined)draft.cost="";if(draft.ship===undefined)draft.ship="";if(draft.coupon===undefined)draft.coupon="";if(draft.couponUsd===undefined)draft.couponUsd="";if(draft.pointsUsd===undefined)draft.pointsUsd="";if(draft.extraCost===undefined)draft.extraCost="";if(draft.accountingV===undefined)draft.accountingV=1;if(draft.kg===undefined)draft.kg="";if(draft.kgp===undefined)draft.kgp=D.kgp||"";if(draft.usd===undefined)draft.usd="";if(draft.comm===undefined)draft.comm="";if(draft.rate===undefined)draft.rate=D.rate||"";if(!isV3(draft))toV3(draft,o);
+ // طلب بلا تكلفة شحن مكتوبة على الشركة: تظهر القيمة التي كانت محسوبة ليراها ويعدّلها
+ if(draft.shipCo===undefined){var A=acct(o);draft.shipCo=Math.round(A.shipCo*100)/100}if(draft.kgUsd===undefined)draft.kgUsd=has(D.kgUsd)?D.kgUsd:"5.5";go("form")}
 // تحويل طلب قديم إلى حقول الحساب الجديدة دون تغيير ربحه: التكلفة والشحن والوزن تتحول إلى الدولار بسعر صرف الطلب
 function toV3(d,o){var c=calc(o),r=n(d.rate)||n(D.rate),act=n(o.accountingV)>=2||batchForOrder(o)?c.purchaseCost:(has(o.cost)?n(o.cost)-n(o.coupon):null),shipL=n(o.ship)+wcost(o)+n(o.extraCost);
  if(!(n(d.usd)>0)&&grossUsd(o)>0)d.usd=grossUsd(o);d.rate=r||"";d.bookDate=d.bookDate||d.date||"";d.pcs=d.pcs||"";
- d.actualUsd=(r>0&&act!==null&&act>0)?Math.round(act/r*10000)/10000:"";d.shipUsd=(r>0&&shipL>0)?Math.round(shipL/r*10000)/10000:"";d.shipFee="";d.priceManual=true;d.accountingV=3}
+ d.actualUsd=(r>0&&act!==null&&act>0)?Math.round(act/r*10000)/10000:"";d.shipUsd=(r>0&&shipL>0)?Math.round(shipL/r*10000)/10000:"";d.shipFee="";d.shipCo=shipL>0?Math.round(shipL*100)/100:"";d.kgUsd=has(D.kgUsd)?D.kgUsd:"5.5";d.priceManual=true;d.accountingV=3}
 function delOrder(){if(confirm("حذف الطلب نهائياً؟")){var id=curId;D.orders=D.orders.filter(function(o){return o.id!==id});D.del=D.del||{};D.del[id]=Date.now();(D.batches||[]).forEach(function(b){b.orderIds=(b.orderIds||[]).filter(function(x){return x!==id});if(b.allocations)delete b.allocations[id]});save();go("home")}}
 function r2(v){return Math.round(n(v)*100)/100}
 // رقم ليبي محلي مثل 0921234567 يتحول إلى 218921234567 لأن wa.me يحتاج رمز الدولة
