@@ -16,13 +16,14 @@ function batchPage(){D.batches=D.batches||[];var d=batchDraft,out='<button class
 
 // ===== حساب الطلب (النسخة 3): حقول الحجز كما يعمل بها المتجر =====
 // صافي الربح = (سعر الشراء من الموقع − تكلفة الشراء الفعلية) × سعر الصرف − تكلفة الشحن على الشركة
-// تكلفة الشحن على الشركة = تكلفة الشحن بالدينار − رسوم الشحن على الزبون
+// تكلفة الشحن على الشركة ورسوم الشحن على الزبون مبلغان يُكتبان يدوياً لكل طلب
+// (طلبات النسخة الأولى من هذا الحساب بلا قيمة مكتوبة تبقى على الفرق: تكلفة الشحن بالدينار − رسوم الزبون)
 function isV3(o){return n(o.accountingV)>=3}
 function siteUsd(o){return n(o.usd)>0?n(o.usd):grossUsd(o)}
 function pieces(o){if(has(o.pcs)&&n(o.pcs)>0)return n(o.pcs);return(o.items||[]).reduce(function(a,i){return a+Math.max(0,n(has(i.qty)?i.qty:1))},0)}
 function actualUsd(o){var b=batchForOrder(o),s=siteUsd(o);if(b){if(s<=0)return null;return Math.max(0,s-batchAllocation(o,b,"coupon")-batchAllocation(o,b,"points"))}return has(o.actualUsd)?n(o.actualUsd):null}
-function acct(o){var r=n(o.rate),s=siteUsd(o),a=actualUsd(o),su=n(o.shipUsd),fee=n(o.shipFee);
- var A={date:o.bookDate||o.date||"",pcs:pieces(o),site:s,actual:a,rate:r,purch:s*r,shipUsd:su,shipLyd:su*r,fee:fee,shipCo:su*r-fee,profit:null};
+function acct(o){var r=n(o.rate),s=siteUsd(o),a=actualUsd(o),su=n(o.shipUsd),fee=n(o.shipFee),ku=has(o.kgUsd)?n(o.kgUsd):(has(D.kgUsd)?n(D.kgUsd):5.5);
+ var A={date:o.bookDate||o.date||"",pcs:pieces(o),site:s,actual:a,rate:r,purch:s*r,kg:n(o.kg),kgUsd:ku,kgLyd:ku*r,shipUsd:su,shipLyd:su*r,fee:fee,shipCo:o.shipCo===undefined?su*r-fee:n(o.shipCo),profit:null};
  if(s>0&&r>0&&a!==null)A.profit=(s-a)*r-A.shipCo;return A}
 function aline(k,v){return'<div class="line"><span>'+k+'</span><span>'+v+'</span></div>'}
 function acctHtml(o,c){var A=acct(o),b=batchForOrder(o),u=function(v){return v===null||v<=0?"—":"$"+num(v)};
@@ -32,7 +33,7 @@ function acctHtml(o,c){var A=acct(o),b=batchForOrder(o),u=function(v){return v==
  aline("تاريخ الحجز",A.date?'<span dir="ltr">'+esc(A.date)+'</span>':"—")+aline("إجمالي عدد المنتجات",A.pcs||"—")+
  aline("سعر الشراء من الموقع",u(A.site))+aline("تكلفة الشراء الفعلية"+(b?" ("+esc(b.name)+")":""),A.actual===null?"—":"$"+num(A.actual))+
  aline("سعر الصرف اليوم",A.rate>0?num(A.rate):"—")+aline("قيمة المشتريات بالدينار",money(A.purch))+
- aline("التكلفة الفعلية للشحن",u(A.shipUsd))+aline("تكلفة الشحن بالدينار",money(A.shipLyd))+
+ aline("سعر الشحن لكل كيلو",u(A.kgUsd)+(A.rate>0?" = "+money(A.kgLyd):""))+aline("الوزن",A.kg>0?num(A.kg)+" كجم":"—")+aline("التكلفة الفعلية للشحن",u(A.shipUsd))+aline("تكلفة الشحن بالدينار",money(A.shipLyd))+
  aline("رسوم الشحن على الزبون",money(A.fee))+aline("تكلفة الشحن على الشركة",money(A.shipCo))+
  (Math.abs(adj)>=0.01?aline("تعديل على سعر البيع",money(adj)):"")+
  '<div class="line big"><span>صافي الربح</span><span class="'+(c.profit===null?"":c.profit>=0?"ok-t":"rem-t")+'">'+(c.profit===null?"—":money(c.profit))+'</span></div>'+
