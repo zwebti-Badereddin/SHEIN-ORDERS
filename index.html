@@ -152,24 +152,34 @@ var PTYPES=["عربون","دفعة","تسوية"],METHODS=["نقداً","حوا�
 var D={orders:[],batches:[],cur:"د.ل",seq:0},draft=null,batchDraft=null,view="home",curId=null,fS="",fQ="";
 var KEY="shein_fb_x";
 if(!D.cur||D.cur==="ريال")D.cur="د.ل";
-var cloud={ref:null,busy:false,dirty:false,timer:null,first:false};
+var cloud={ref:null,busy:false,dirty:false,timer:null,first:false,sent:{}};
 function keep(){try{localStorage.setItem(KEY,JSON.stringify(D))}catch(e){}}
 function setSync(k){var e=document.getElementById("sync");if(!e)return;e.textContent={ok:"",wait:"",err:"تعذّر الحفظ على الحساب، البيانات محفوظة على هذا الجهاز",big:"تحذير: حجم البيانات اقترب من الحد الأقصى للحساب (1MB). صدّر نسخة احتياطية واحذف الطلبات المكتملة القديمة",local:""}[k]||""}
 function bytes(t){try{return new TextEncoder().encode(t).length}catch(e){return t.length*2}}
 function save(){D.ts=Date.now();keep();if(cloud.ref){clearTimeout(cloud.timer);setSync("wait");cloud.timer=setTimeout(push,800)}}
 function push(){if(!cloud.ref)return;if(cloud.busy){cloud.dirty=true;return}if(!D.ts)D.ts=Date.now();cloud.busy=true;
  var j=JSON.stringify(D),big=bytes(j)>900000;
- cloud.ref.set({json:j,ts:D.ts}).then(function(){setSync(big?"big":"ok")},function(){setSync("err")}).then(function(){cloud.busy=false;if(cloud.dirty){cloud.dirty=false;push()}})}
-function adopt(r){D=r;if(!D.cur)D.cur="د.ل";if(!Array.isArray(D.batches))D.batches=[];if(!D.del)D.del={};keep();setSync("ok");if(view!=="form")render()}
-function merge(r){var pref=n(D.ts)>n(r.ts)?D:r,oth=pref===D?r:D,map={},sq=Math.max(n(D.seq),n(r.seq)),del={};
- [D.del,r.del].forEach(function(x){Object.keys(x||{}).forEach(function(k){del[k]=Math.max(n(del[k]),n(x[k]))})});
- (oth.orders||[]).forEach(function(o){map[o.id]=o});(pref.orders||[]).forEach(function(o){map[o.id]=o});
- var all=Object.keys(map).filter(function(k){return !del[k]}).map(function(k){sq=Math.max(sq,n(map[k].no));return map[k]});
+ var sent=D.ts;cloud.timer=null;cloud.sent[sent]=1;cloud.ref.set({json:j,ts:sent}).then(function(){D.sync=Math.max(n(D.sync),sent);keep();setSync(big?"big":"ok")},function(){setSync("err")}).then(function(){cloud.busy=false;if(cloud.dirty){cloud.dirty=false;push()}})}
+function adopt(r){D=r;D.sync=n(r.ts);if(!D.cur)D.cur="د.ل";if(!Array.isArray(D.batches))D.batches=[];if(!D.del)D.del={};keep();setSync("ok");if(view!=="form")render()}
+// وقت إنشاء العنصر من معرّفه (o123… / b123…) أو آخر تعديل عليه
+function stamp(x){return Math.max(Number(String(x.id).slice(1))||0,n(x.mts))}
+function touch(o){if(o)o.mts=Date.now()}
+// دمج النسخة المحلية مع نسخة الحساب. القاعدة: عنصر موجود على هذا الجهاز فقط يبقى
+// إذا أُنشئ أو عُدّل بعد آخر مزامنة ناجحة، وإلا فهو حُذف من جهاز آخر فلا يُعاد.
+// هذا يمنع عودة الطلبات المحذوفة حتى لو حُذفت بنسخة قديمة من التطبيق لا تسجّل الحذف.
+function merge(r){var L=D,pref=n(L.ts)>n(r.ts)?L:r,oth=pref===L?r:L,sq=Math.max(n(L.seq),n(r.seq)),del={};
+ var last=has(L.sync)?n(L.sync):Math.min(n(L.ts),n(r.ts));
+ [L.del,r.del].forEach(function(x){Object.keys(x||{}).forEach(function(k){del[k]=Math.max(n(del[k]),n(x[k]))})});
+ function pick(la,ra){var lm={},rm={},out={};(la||[]).forEach(function(x){lm[x.id]=x});(ra||[]).forEach(function(x){rm[x.id]=x});
+  Object.keys(rm).forEach(function(k){if(del[k])return;var lo=lm[k],ro=rm[k];out[k]=!lo?ro:(n(lo.mts)!==n(ro.mts)?(n(lo.mts)>n(ro.mts)?lo:ro):(pref===L?lo:ro))});
+  Object.keys(lm).forEach(function(k){if(del[k]||rm[k])return;if(stamp(lm[k])>last)out[k]=lm[k]});
+  return out}
+ var om=pick(L.orders,r.orders),all=Object.keys(om).map(function(k){sq=Math.max(sq,n(om[k].no));return om[k]});
  // طلبان أُنشئا على جهازين دون اتصال قد يحملان نفس الرقم: يبقى الأقدم ويُعاد ترقيم الأحدث
  var seen={};all.slice().sort(function(a,b){return String(a.id).localeCompare(String(b.id))}).forEach(function(o){if(seen[o.no])o.no=++sq;seen[o.no]=1});
- var bm={};(oth.batches||[]).forEach(function(b){bm[b.id]=b});(pref.batches||[]).forEach(function(b){bm[b.id]=b});
- var bs=Object.keys(bm).filter(function(k){return !del[k]}).map(function(k){var b=bm[k];b.orderIds=(b.orderIds||[]).filter(function(id){return !!map[id]&&!del[id]});return b});
- D={orders:all,batches:bs,del:del,cur:pref.cur||"د.ل",seq:sq,rate:pref.rate||oth.rate||"",kgp:pref.kgp||oth.kgp||""};save();if(view!=="form")render()}
+ var bm=pick(L.batches,r.batches),bs=Object.keys(bm).map(function(k){var b=bm[k];b.orderIds=(b.orderIds||[]).filter(function(id){return !!om[id]});return b});
+ all.forEach(function(o){if(o.batchId&&!bm[o.batchId])delete o.batchId});
+ D={orders:all,batches:bs,del:del,sync:n(r.ts),cur:pref.cur||"د.ل",seq:sq,rate:pref.rate||oth.rate||"",kgp:pref.kgp||oth.kgp||""};save();if(view!=="form")render()}
 function onSnap(snap){
  if(!snap.exists){cloud.first=true;if(D.orders.length)push();else setSync("ok");return}
  var r;try{r=JSON.parse(snap.data().json)}catch(e){setSync("err");return}
@@ -178,7 +188,9 @@ function onSnap(snap){
   if(D.orders.length&&n(D.ts)!==n(r.ts))merge(r);
   else if(n(r.ts)>n(D.ts))adopt(r);
   else setSync("ok");return}
- if(!snap.metadata.hasPendingWrites&&n(r.ts)>n(D.ts))adopt(r);
+ if(snap.metadata.hasPendingWrites||cloud.sent[n(r.ts)]||n(r.ts)===n(D.ts))return;
+ // تحديث من جهاز آخر: إن كانت هنا تعديلات لم تُرفع بعد (مثل حذف قبل ثانية) ندمج بدل الاستبدال حتى لا تضيع
+ if(cloud.timer||cloud.busy||n(D.ts)!==n(D.sync))merge(r);else adopt(r);
 }
 var FB={apiKey:"AIzaSyCQW9FWYX9gZhCOzKZWHfgPIcckK7dE5XE",authDomain:"shein-orders08.firebaseapp.com",projectId:"shein-orders08",storageBucket:"shein-orders08.firebasestorage.app",messagingSenderId:"961733001353",appId:"1:961733001353:web:cf33b1bb52e5782413c658"};
 firebase.initializeApp(FB);
@@ -194,7 +206,7 @@ function doLogout(){if(!confirm("تسجيل الخروج؟ ستُحذف نسخة
  cloud.ref.set({json:JSON.stringify(D),ts:D.ts||Date.now()}).then(out,function(){if(confirm("تعذّر رفع آخر التعديلات إلى الحساب. إذا خرجت الآن قد تضيع. الخروج على أي حال؟"))out()})}
 auth.onAuthStateChanged(function(u){
  if(unsub){unsub();unsub=null}
- cloud.ref=null;cloud.first=false;clearTimeout(cloud.timer);
+ cloud.ref=null;cloud.first=false;clearTimeout(cloud.timer);cloud.timer=null;cloud.sent={};
  if(!u){D={orders:[],batches:[],del:{},cur:"د.ل",seq:0};view="home";showLogin();return}
  KEY="shein_fb_"+u.uid;D={orders:[],batches:[],del:{},cur:"د.ل",seq:0};
  try{var s=localStorage.getItem(KEY);if(s)D=JSON.parse(s)}catch(e){}
@@ -295,8 +307,8 @@ function saveOrder(){
  if(n(draft.rate)>0)D.rate=draft.rate;
  if(n(draft.kgp)>0)D.kgp=draft.kgp;
  draft.items=draft.items.filter(function(i){return i.link||i.spec||n(i.priceUsd)>0});
- if(!draft.id){D.seq=(D.seq||D.orders.length)+1;draft.id="o"+Date.now();draft.no=D.seq;draft.date=today();if(n(draft.deposit)>0){draft.pays.push({amount:n(draft.deposit),type:"عربون",method:draft.method||METHODS[0],date:today()});draft.status=STATUSES[1]}delete draft.deposit;delete draft.method;D.orders.push(draft)}
- else{D.orders=D.orders.map(function(o){return o.id===draft.id?draft:o})}
+ if(!draft.id){D.seq=(D.seq||D.orders.length)+1;draft.id="o"+Date.now();draft.mts=Date.now();draft.no=D.seq;draft.date=today();if(n(draft.deposit)>0){draft.pays.push({amount:n(draft.deposit),type:"عربون",method:draft.method||METHODS[0],date:today()});draft.status=STATUSES[1]}delete draft.deposit;delete draft.method;D.orders.push(draft)}
+ else{touch(draft);D.orders=D.orders.map(function(o){return o.id===draft.id?draft:o})}
  save();go("detail",draft.id);
 }
 
@@ -377,15 +389,15 @@ function showHow(){
  document.body.appendChild(m)}
 function closeHow(){var m=document.getElementById("how");if(m)m.remove()}
 function regSW(){if("serviceWorker" in navigator)window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){})})}
-function setStatus(v){get(curId).status=v;save()}
+function setStatus(v){var o=get(curId);o.status=v;touch(o);save()}
 function addPay(){var a=n(document.getElementById("pa").value);if(a<=0){alert("اكتب مبلغاً صحيحاً");return}
  if(a>calc(get(curId)).rem&&!confirm("المبلغ أكبر من المتبقي. متابعة؟"))return;
  var o=get(curId),ty=document.getElementById("pt").value;
- o.pays.push({amount:a,type:ty,method:document.getElementById("pm").value,date:today()});
+ o.pays.push({amount:a,type:ty,method:document.getElementById("pm").value,date:today()});touch(o);
  if(o.status===STATUSES[0]&&ty==="عربون")o.status=STATUSES[1];
  save();render()}
 function fillRem(){var c=calc(get(curId));if(c.rem<=0)return;document.getElementById("pa").value=c.rem;document.getElementById("pt").value="تسوية"}
-function delPay(k){if(confirm("حذف هذه الدفعة؟")){get(curId).pays.splice(k,1);save();render()}}
+function delPay(k){if(confirm("حذف هذه الدفعة؟")){var o=get(curId);o.pays.splice(k,1);touch(o);save();render()}}
 function editOrder(){var o=get(curId);draft=JSON.parse(JSON.stringify(o));if(!has(draft.price))draft.price=calc(o).tot;if(draft.cart===undefined)draft.cart="";if(draft.sheinNo===undefined)draft.sheinNo="";if(draft.cost===undefined)draft.cost="";if(draft.ship===undefined)draft.ship="";if(draft.coupon===undefined)draft.coupon="";if(draft.couponUsd===undefined)draft.couponUsd="";if(draft.pointsUsd===undefined)draft.pointsUsd="";if(draft.extraCost===undefined)draft.extraCost="";if(draft.accountingV===undefined)draft.accountingV=1;if(draft.kg===undefined)draft.kg="";if(draft.kgp===undefined)draft.kgp=D.kgp||"";if(draft.usd===undefined)draft.usd="";if(draft.comm===undefined)draft.comm="";if(draft.rate===undefined)draft.rate=D.rate||"";go("form")}
 function delOrder(){if(confirm("حذف الطلب نهائياً؟")){var id=curId;D.orders=D.orders.filter(function(o){return o.id!==id});D.del=D.del||{};D.del[id]=Date.now();(D.batches||[]).forEach(function(b){b.orderIds=(b.orderIds||[]).filter(function(x){return x!==id});if(b.allocations)delete b.allocations[id]});save();go("home")}}
 function r2(v){return Math.round(n(v)*100)/100}
