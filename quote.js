@@ -129,7 +129,7 @@ function qPrep(file){return new Promise(function(res,rej){var url=URL.createObje
  im.onerror=function(){URL.revokeObjectURL(url);rej(new Error("img"))};im.src=url})}
 // تحويل النص المقروء إلى منتجات: كل سطر فيه سعر بالدولار يُغلق منتجاً، والسطران قبله هما الاسم واللون/المقاس.
 // أول سعر في السطر هو السعر الحالي، والسعر المشطوب بعده يُتجاهل.
-function qClean(l){return l.replace(/(\dX+|\bX+)[lI!|1](?![A-Za-z])/g,"$1L").replace(/^[^A-Za-z0-9؀-ۿ]+/,"").replace(/[\s.…]+$/,"").replace(/\s+/g," ").trim()}
+function qClean(l){l=l.replace(/[<>©®|\[\]{}]/g," ").replace(/(^|\s)\d{5,}(?=\s|$)/g," ");return l.replace(/(\dX+|\bX+)[lI!|1](?![A-Za-z])/g,"$1L").replace(/^[^A-Za-z0-9؀-ۿ]+/,"").replace(/[\s.…]+$/,"").replace(/\s+/g," ").trim()}
 // أسعار SHEIN دائماً بسنتين، والسنتات تُكتب صغيرة فوق السطر فقد تُقرأ "34 34" أو "3434" أو "2 1 .02"
 function qPrice(tok){tok=tok.replace(/\s+$/,"");var d=tok.search(/[.,:]/),L,R;
  if(d>=0){L=tok.slice(0,d).replace(/\D/g,"");R=(tok.slice(d+1).replace(/\D/g,"")+"00").slice(0,2)}
@@ -155,19 +155,42 @@ function qFix(v,o){if(!(v>0))return{v:v};o=o||{a:0,b:0};
  if(o.a&&v>o.a*1.001)return{v:v,flag:"check"};
  if(v>=100){f=tryB(o.b);return f?{v:f,flag:"fixed"}:{v:v,flag:"check"}}
  return{v:v}}
-function qParse(text){var items=[],title="",variant="",skip=/sub\s*total|total|saved|discount|coupon|shipping|tax|points|المجموع|الإجمالي|الخصم|الشحن/i,
- noise=/lowest price|bought|add all|items shared|add to cart|checkout|similar|^\W*-?\d+\s*%|^\d{1,2}:\d{2}/i;
- String(text).split(/\n/).forEach(function(raw){var l=raw.replace(/(\d),(\d{3})(?!\d)/g,"$1$2").trim();if(!l)return;
-  // السعر ينتهي عند سنتين بعد الفاصلة، أو "34 34"، أو رقم متصل، حتى لا يندمج بالسعر المشطوب بعده
-  // وفي أول السطر قد تُقرأ علامة $ حرف s، فنقبلها هناك إن تبعها سعر بسنتين
-  var m=l.match(/(?:US)?\$\s*(\d{1,4}(?: \d)?\s?[.,:]\s?\d ?\d|\d+ \d{2}(?!\d)|\d+)/)||l.match(/^[sS§]\s?(\d{1,4}(?: \d)?\s?[.,:]\s?\d ?\d|\d{1,3} \d{2}(?!\d))/);
-  if(m){if(skip.test(l)){title="";variant="";return}
-   var v=qPrice(m[1]),o=qOrig(l.slice(m.index+m[0].length)),fx=qFix(v,o);
-   if(fx.v>0&&fx.v<5000){var it={desc:[title,variant].filter(Boolean).join(" · "),qty:1,usd:fx.v.toFixed(2)};if(fx.flag)it.flag=fx.flag;items.push(it)}
+// يعمل على واجهة SHEIN الإنجليزية والعربية. في العربية يكون السعر الحالي آخر سعر في السطر (يمين الصورة)
+// والسعر المشطوب قبله، وخانة الكمية "v1" في أول السطر.
+function qArabic(t){return(String(t).match(/[\u0600-\u06FF]/g)||[]).length}
+// علامات واجهة SHEIN العربية في القراءة الإنجليزية: خانة الكمية "v1" أول سطر السعر، أو نسبة الخصم مكتوبة "%16-"
+function qIsRtl(t){return/(^|\n)\W*[vV∨]\s?\d{1,2}\s|%\s?\d+\s?-/.test(String(t))}
+// الواجهة العربية: الأسعار والكميات من القراءة الإنجليزية (تحافظ على ترتيب السطر)، والأسماء من القراءة العربية
+function qMerge(t1,t2){var a=qParse(t1,true);if(qArabic(t2)<=40)return a;var b=qParse(t2,true);
+ if(a.length===b.length){a.forEach(function(it,i){it.desc=b[i].desc});return a}return b.length>a.length?b:a}
+function qParse(text,rtlForce){var items=[],title="",variant="",T=String(text),rtlAll=!!rtlForce,
+ skip=/sub\s*total|total|saved|discount|coupon|shipping|tax|points|المجموع|الإجمالي|الخصم|الشحن/i,
+ noise=/lowest price|bought|add all|items shared|add to cart|checkout|similar|^\W*-?\d+\s*%|^\d{1,2}:\d{2}|توفير|تم شراؤها|بهذا السعر|ترندات|الأكثر مبيع/i,
+ PR=/(?:US)?\$\s*(\d{1,4}(?: \d)?\s?[.,:]\s?\d ?\d|\d+ \d{2}(?!\d)|\d+)/g;
+ T.split(/\n/).forEach(function(raw){var l=raw.replace(/[‎‏‪-‮⁦-⁩]/g,"").replace(/(\d),(\d{3})(?!\d)/g,"$1$2").trim();if(!l)return;
+  var ms=[],mm;PR.lastIndex=0;while((mm=PR.exec(l)))ms.push(mm);
+  // في أول السطر قد تُقرأ علامة $ حرف s، فنقبلها هناك إن تبعها سعر بسنتين
+  if(!ms.length){mm=l.match(/^[sS§]\s?(\d{1,4}(?: \d)?\s?[.,:]\s?\d ?\d|\d{1,3} \d{2}(?!\d))/);if(mm)ms.push(mm)}
+  if(ms.length){if(skip.test(l)){title="";variant="";return}
+   var rtl=rtlAll||/%\s?\d+\s?-/.test(l)||/^\W*[vV∨]\s?\d/.test(l),cur=rtl?ms[ms.length-1]:ms[0],v=qPrice(cur[1]),o;
+   if(ms.length>1)o={a:qPrice((rtl?ms[ms.length-2]:ms[1])[1]),b:0};
+   else o=rtl?qOrigBefore(l.slice(0,cur.index)):qOrig(l.slice(cur.index+cur[0].length));
+   var qm=l.slice(0,ms[0].index).match(/(?:^|\s)[vV∨]\s?(\d{1,2})(?!\d)/),qty=qm?Math.min(50,Math.max(1,+qm[1])):1,fx=qFix(v,o);
+   if(fx.v>0&&fx.v<5000){var it={desc:[title,variant].filter(Boolean).join(" · "),qty:qty,usd:fx.v.toFixed(2)};if(fx.flag)it.flag=fx.flag;items.push(it)}
    title="";variant="";return}
-  if(noise.test(l))return;if((l.match(/[A-Za-z؀-ۿ]/g)||[]).length<4)return;
-  var t=qClean(l);if(title&&!variant&&/\//.test(t))variant=t;else if(!title)title=t;else if(!variant)variant=t});
+  if(noise.test(l))return;
+  // سطر "تم البيع بواسطة …": اللون والمقاس بعد الفاصل |، وإلا فهو اسم البائع ولا نحتاجه
+  if(/بواسطة|sold by/i.test(l)){var pp=l.split("|").filter(function(x){return/\//.test(x)&&!/بواسطة|sold by/i.test(x)});if(!pp.length)return;l=pp[0]}
+  if((l.match(/[A-Za-z؀-ۿ]/g)||[]).length<4)return;
+  var t=qClean(l);if(!t)return;if(title&&!variant&&/\//.test(t))variant=qSize(t);else if(!title&&/\//.test(t)&&/[\u0600-\u06FF]/.test(t)&&t.length<40)variant=qSize(t);else if(!title)title=qTitle(t);else if(!variant)variant=qSize(t)});
  return items}
+// السعر المشطوب قبل السعر الحالي (الواجهة العربية): آخر رقم من 3 خانات فأكثر قبله
+function qOrigBefore(t){var all=t.match(/[\$sSg§£€]?\s*\d[\d.,:-]*\d/g)||[];all=all.filter(function(x){return x.replace(/\D/g,"").length>=3});return all.length?qOrig(all[all.length-1]):{a:0,b:0}}
+// بقايا الأيقونات حول الاسم العربي: حروف لاتينية قصيرة في طرفيه، وما بعد "..." عند قطع الاسم
+function qTitle(t){if(!/[\u0600-\u06FF]/.test(t))return t;var w=t.split(" "),j=function(x){return/^[A-Za-z]{1,3}[”"']?$|^\d{1,2}$/.test(x)};
+ while(w.length>1&&j(w[0]))w.shift();while(w.length>1&&j(w[w.length-1]))w.pop();return w.join(" ").replace(/(\.{2,}|…)\s*\S{0,4}$/,"…")}
+// المقاس S يُقرأ أحياناً 5
+function qSize(t){t=t.replace(/^\d{1,2}\s+(?=[\u0600-\u06FF])/,"");return t.replace(/(^|[\s\/])5(?=\s*(?:[>\/]|$))/g,"$1S").replace(/\s*[<>]\s*$/,"").replace(/^\s*[<>]\s*/,"").trim()}
 var qShots=[];
 function qShotsHtml(){return qShots.length?'<details class="qshots" open><summary>الصورة المرفقة للمقارنة</summary>'+qShots.map(function(u){return'<img src="'+u+'" alt="صورة السلة">'}).join("")+'</details>':""}
 function qOcr(input){var files=[].slice.call(input.files||[]);input.value="";if(!files.length)return;
@@ -176,8 +199,13 @@ function qOcr(input){var files=[].slice.call(input.files||[]);input.value="";if(
  say("جارٍ تجهيز قارئ الصور… في المرة الأولى يحتاج تحميلاً قصيراً");
  qLib().then(function(T){return T.createWorker("eng",1,{logger:function(m){if(m.status==="recognizing text")say("جارٍ قراءة الصورة… "+Math.round(m.progress*100)+"%")}})})
  .then(function(w){worker=w;return w.setParameters({tessedit_pageseg_mode:"4",preserve_interword_spaces:"1"})})
- .then(function(){var chain=Promise.resolve();files.forEach(function(f,fi){chain=chain.then(function(){return qPrep(f)}).then(function(cv){if(files.length>1)say("جارٍ قراءة الصورة "+(fi+1)+" من "+files.length+"…");return worker.recognize(cv)})
-  .then(function(r){var got=qParse(r.data.text),prev=quote.items.slice(before);
+ .then(function(){var chain=Promise.resolve();files.forEach(function(f,fi){chain=chain.then(function(){return qPrep(f)}).then(function(cv){if(files.length>1)say("جارٍ قراءة الصورة "+(fi+1)+" من "+files.length+"…");
+   // القراءة الأولى بالإنجليزية. إن ظهر أن السلة بالواجهة العربية تُعاد القراءة بالعربية والإنجليزية معاً
+   return worker.recognize(cv).then(function(r){var t1=r.data.text;if(!qIsRtl(t1))return qParse(t1);
+    say("السلة بالعربية، جارٍ قراءة الأسماء العربية…");
+    return (worker.__ara?Promise.resolve():worker.reinitialize(["ara","eng"]).then(function(){worker.__ara=1;return worker.setParameters({tessedit_pageseg_mode:"4",preserve_interword_spaces:"1"})}))
+     .then(function(){return worker.recognize(cv)}).then(function(r2){return qMerge(t1,r2.data.text)})})})
+  .then(function(got){var prev=quote.items.slice(before);
    // عند تداخل لقطتين متتاليتين لا يُكرَّر المنتج نفسه
    got.forEach(function(it){if(fi>0&&prev.some(function(p){return p.usd===it.usd&&p.desc===it.desc}))return;quote.items.push(it);added++})})});return chain})
  .then(function(){if(worker)worker.terminate();qRedraw();
