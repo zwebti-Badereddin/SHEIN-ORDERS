@@ -8,7 +8,7 @@ function qTotals(){var q=quote,usd=0,pcs=0;q.items.forEach(function(i){var k=n(h
  var r=n(q.rate),lyd=usd*r,fee=n(q.shipFee);return{usd:usd,pcs:pcs,rate:r,lyd:lyd,fee:fee,total:lyd+fee}}
 function qRow(it,i){return'<div class="qrow"><input class="qd" dir="auto" placeholder="المنتج (اختياري)" value="'+esc(it.desc)+'" oninput="quote.items['+i+'].desc=this.value;qKeep()">'+
  '<input class="qq" inputmode="numeric" aria-label="الكمية" value="'+esc(has(it.qty)?it.qty:1)+'" oninput="quote.items['+i+'].qty=this.value;qUpd()">'+
- '<input class="qp" inputmode="decimal" dir="ltr" placeholder="$" aria-label="السعر بالدولار" value="'+esc(it.usd)+'" oninput="quote.items['+i+'].usd=this.value;qUpd()">'+
+ '<input class="qp'+(it.flag?" qwarn":"")+'" inputmode="decimal" dir="ltr" placeholder="$" aria-label="السعر بالدولار"'+(it.flag?' title="'+(it.flag==="fixed"?"صُحّح تلقائياً، تأكد منه":"تأكد من هذا السعر")+'"':'')+' value="'+esc(it.usd)+'" oninput="delete quote.items['+i+'].flag;this.classList.remove(\'qwarn\');quote.items['+i+'].usd=this.value;qUpd()">'+
  '<button class="x" onclick="qDel('+i+')" aria-label="حذف">'+ic("x")+'</button></div>'}
 function quotePage(){var q=quote,t=qTotals();
  return'<button class="back" onclick="go(\'home\')">‹ رجوع</button><h1>فاتورة مبدئية</h1>'+
@@ -18,7 +18,7 @@ function quotePage(){var q=quote,t=qTotals();
  '<p class="note" style="margin-top:6px">صوّر سلة SHEIN أو قائمة المنتجات المشتركة، ويمكن اختيار أكثر من صورة. يقرأ التطبيق الأسماء والأسعار وتراجعها قبل الإرسال.</p><div id="qocr" class="qocr"></div>'+
  '<label>أو اكتب الأسعار مفصولة بمسافة</label><div class="row"><div style="flex:3"><input id="qbulk" dir="ltr" inputmode="decimal" placeholder="34.34 39.40 30.97 21.02"></div><div style="flex:1"><button class="btn sec" style="width:100%" onclick="qBulk()">إضافة</button></div></div>'+
  '<h2>منتجات السلة</h2><div class="qhead"><span>المنتج</span><span>الكمية</span><span>السعر</span><span></span></div><div id="qitems">'+(q.items.length?q.items.map(qRow).join(""):'<div class="empty" style="padding:12px">لا توجد منتجات بعد.</div>')+'</div>'+
- '<div class="bar"><button class="btn sec" onclick="qAdd()">+ إضافة منتج</button></div>'+
+ '<div class="bar"><button class="btn sec" onclick="qAdd()">+ إضافة منتج</button></div><div id="qshots">'+qShotsHtml()+'</div>'+
  '<div class="row"><div><label>سعر الصرف اليوم</label><input inputmode="decimal" value="'+esc(q.rate)+'" oninput="quote.rate=this.value;qUpd()"></div><div><label>رسوم الشحن على الزبون ('+esc(D.cur)+')</label><input inputmode="decimal" value="'+esc(q.shipFee)+'" placeholder="اختياري" oninput="quote.shipFee=this.value;qUpd()"></div></div>'+
  '<div class="card" style="margin-top:14px" id="qsum">'+qSum(t)+'</div>'+
  '<div class="bar"><button class="btn" onclick="qShare(\'jpg\')">إرسال صورة</button><button class="btn" onclick="qShare(\'pdf\')">إرسال PDF</button></div>'+
@@ -130,17 +130,43 @@ function qPrice(tok){tok=tok.replace(/\s+$/,"");var d=tok.search(/[.,:]/),L,R;
  if(d>=0){L=tok.slice(0,d).replace(/\D/g,"");R=(tok.slice(d+1).replace(/\D/g,"")+"00").slice(0,2)}
  else{var g=tok.trim().split(/\s+/);if(g.length>1&&/^\d{2}$/.test(g[1])){L=g[0];R=g[1]}else if(g[0].length>=3){L=g[0].slice(0,-2);R=g[0].slice(-2)}else{L=g[0];R="00"}}
  return L?parseFloat(L+"."+R):0}
+// السعر الأصلي المشطوب بعد السعر الحالي في نفس السطر. علامة $ فيه تُقرأ غالباً رقماً (5 أو 6 أو 8)
+// أو حرفاً، والنقطة تُقرأ "-"، مثل "623-90" وهي 23.90
+// السعر الأصلي المشطوب بعد السعر الحالي في نفس السطر. علامة $ فيه تُقرأ غالباً رقماً (5 أو 6 أو 8)
+// أو حرفاً، والنقطة تُقرأ "-"، مثل "623-90" وهي 23.90. نعيد القراءة كما هي، والقراءة بعد حذف ذلك الرقم.
+function qOrig(rest){var m=rest.match(/[\$sS§£€]?\s*(\d[\d\s.,:-]*)/);if(!m)return{a:0,b:0};var t=m[1].replace(/-/g,".").trim(),dg=t.replace(/\D/g,"");
+ if(dg.length<3)return{a:0,b:0};var drop=dg.length>=4&&/[5689]/.test(dg[0])?qPrice(t.replace(/^\d\s*/,"")):0,as=qPrice(t);
+ return dg.length>=5&&drop?{a:drop,b:as}:{a:as,b:drop}}
+// السعر الحالي لا يتجاوز السعر الأصلي. إن تجاوزه فالخطأ غالباً رقم زائد (271.02) أو 7 مكان 1 (27.02):
+// نجرّب حذف رقم أو استبدال 7 بـ 1 ونأخذ أكبر قيمة لا تتجاوز الأصلي، ونعلّم السعر للمراجعة.
+// أسعار 100$ فأكثر نادرة في سلال SHEIN فتُعلَّم دائماً.
+function qFix(v,o){if(!(v>0))return{v:v};o=o||{a:0,b:0};
+ function tryB(bound){if(!bound||v<=bound*1.001)return 0;var c=v.toFixed(2),ip=c.split(".")[0],cents=c.split(".")[1],cand=[],i,j;
+  // حذف رقم فقط عندما يكون الجزء الصحيح 3 أرقام فأكثر (271 ← 21)، أما 7 ← 1 فدائماً (27 ← 21)
+  for(i=0;i<ip.length;i++){if(ip.length>=3)cand.push(ip.slice(0,i)+ip.slice(i+1));if(ip[i]==="7")cand.push(ip.slice(0,i)+"1"+ip.slice(i+1))}
+  if(ip.length>=3)for(i=0;i<ip.length;i++)if(ip[i]==="7")for(j=0;j<ip.length-1;j++){var d=ip.slice(0,i)+"1"+ip.slice(i+1);cand.push(d.slice(0,j)+d.slice(j+1))}
+  var best=0;cand.forEach(function(x){var y=parseFloat(x+"."+cents);if(y<=bound*1.001&&y>=bound*0.25&&y>best)best=y});return best}
+ var f=tryB(o.a);if(f)return{v:f,flag:"fixed"};
+ if(o.a&&v>o.a*1.001)return{v:v,flag:"check"};
+ if(v>=100){f=tryB(o.b);return f?{v:f,flag:"fixed"}:{v:v,flag:"check"}}
+ return{v:v}}
 function qParse(text){var items=[],title="",variant="",skip=/sub\s*total|total|saved|discount|coupon|shipping|tax|points|المجموع|الإجمالي|الخصم|الشحن/i,
  noise=/lowest price|bought|add all|items shared|add to cart|checkout|similar|^\W*-?\d+\s*%|^\d{1,2}:\d{2}/i;
  String(text).split(/\n/).forEach(function(raw){var l=raw.replace(/(\d),(\d{3})(?!\d)/g,"$1$2").trim();if(!l)return;
-  var m=l.match(/(?:US)?\$\s*([\d\s.,:]+)/);
+  // السعر ينتهي عند سنتين بعد الفاصلة، أو "34 34"، أو رقم متصل، حتى لا يندمج بالسعر المشطوب بعده
+  // وفي أول السطر قد تُقرأ علامة $ حرف s، فنقبلها هناك إن تبعها سعر بسنتين
+  var m=l.match(/(?:US)?\$\s*(\d{1,4}(?: \d)?\s?[.,:]\s?\d ?\d|\d+ \d{2}(?!\d)|\d+)/)||l.match(/^[sS§]\s?(\d{1,4}(?: \d)?\s?[.,:]\s?\d ?\d|\d{1,3} \d{2}(?!\d))/);
   if(m){if(skip.test(l)){title="";variant="";return}
-   var v=qPrice(m[1]);if(v>0&&v<5000)items.push({desc:[title,variant].filter(Boolean).join(" · "),qty:1,usd:v.toFixed(2)});
+   var v=qPrice(m[1]),o=qOrig(l.slice(m.index+m[0].length)),fx=qFix(v,o);
+   if(fx.v>0&&fx.v<5000){var it={desc:[title,variant].filter(Boolean).join(" · "),qty:1,usd:fx.v.toFixed(2)};if(fx.flag)it.flag=fx.flag;items.push(it)}
    title="";variant="";return}
   if(noise.test(l))return;if((l.match(/[A-Za-z؀-ۿ]/g)||[]).length<4)return;
   var t=qClean(l);if(title&&!variant&&/\//.test(t))variant=t;else if(!title)title=t;else if(!variant)variant=t});
  return items}
+var qShots=[];
+function qShotsHtml(){return qShots.length?'<details class="qshots" open><summary>الصورة المرفقة للمقارنة</summary>'+qShots.map(function(u){return'<img src="'+u+'" alt="صورة السلة">'}).join("")+'</details>':""}
 function qOcr(input){var files=[].slice.call(input.files||[]);input.value="";if(!files.length)return;
+ qShots.forEach(function(u){URL.revokeObjectURL(u)});qShots=files.map(function(f){return URL.createObjectURL(f)});var sh=document.getElementById("qshots");if(sh)sh.innerHTML=qShotsHtml();
  var st=document.getElementById("qocr"),say=function(t,bad){if(st){st.textContent=t;st.className="qocr"+(bad?" bad":"")}},added=0,before=quote.items.length,worker=null;
  say("جارٍ تجهيز قارئ الصور… في المرة الأولى يحتاج تحميلاً قصيراً");
  qLib().then(function(T){return T.createWorker("eng",1,{logger:function(m){if(m.status==="recognizing text")say("جارٍ قراءة الصورة… "+Math.round(m.progress*100)+"%")}})})
@@ -150,5 +176,6 @@ function qOcr(input){var files=[].slice.call(input.files||[]);input.value="";if(
    // عند تداخل لقطتين متتاليتين لا يُكرَّر المنتج نفسه
    got.forEach(function(it){if(fi>0&&prev.some(function(p){return p.usd===it.usd&&p.desc===it.desc}))return;quote.items.push(it);added++})})});return chain})
  .then(function(){if(worker)worker.terminate();qRedraw();
-  say(added?"أُضيف "+added+" منتج من الصورة. راجع الأسماء والأسعار والكميات قبل الإرسال.":"لم أجد أسعاراً بالدولار في الصورة. جرّب لقطة أوضح أو أدخل الأسعار يدوياً.",!added)})
+  var fl=quote.items.slice(before).filter(function(i){return i.flag}).length;
+  say(added?"أُضيف "+added+" منتج من الصورة."+(fl?" راجع "+(fl===1?"السعر المعلَّم":"الأسعار المعلَّمة ("+fl+")")+" باللون البرتقالي وقارنه بالصورة.":" راجع الأسماء والأسعار والكميات قبل الإرسال."):"لم أجد أسعاراً بالدولار في الصورة. جرّب لقطة أوضح أو أدخل الأسعار يدوياً.",!added)})
  .catch(function(e){if(worker)worker.terminate();say(e&&e.message==="net"?"تعذّر تحميل قارئ الصور. تأكد من اتصال الإنترنت ثم حاول مجدداً.":"تعذّرت قراءة الصورة. جرّب صورة أخرى أو أدخل الأسعار يدوياً.",true)})}
