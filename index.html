@@ -72,6 +72,14 @@ label{display:block;font-size:13.5px;color:var(--mut);margin:14px 0 5px}
 .btn.bad{background:var(--card);color:var(--bad);border-color:var(--line)}
 .btn.full{width:100%}
 .bar{display:flex;gap:8px;margin:14px 0}.bar>.btn{flex:1}
+.bar.grid2{display:grid;grid-template-columns:1fr 1fr}
+/* صفوف منتجات الفاتورة المبدئية */
+.qhead,.qrow{display:grid;grid-template-columns:1fr 64px 96px 36px;gap:6px;align-items:center}
+.qhead{font-size:12.5px;color:var(--mut);padding:0 4px 4px}
+.qrow{margin-bottom:6px}.qrow input{min-height:42px;padding:8px 10px}.qrow .qq{text-align:center}
+.qpick{display:block;margin:14px 0 0;cursor:pointer}.qpick input{position:absolute;width:1px;height:1px;opacity:0}.qpick .btn{display:flex;align-items:center;justify-content:center;gap:8px}.qpick:focus-within .btn{outline:2px solid var(--acc);outline-offset:2px}
+.qocr{font-size:13.5px;color:var(--ok);background:var(--okbg);border-radius:10px;padding:8px 12px;margin-top:8px}.qocr:empty{display:none}.qocr.bad{color:var(--warn);background:var(--warnbg)}
+.qimg{display:block;width:100%;border:1px solid var(--line);border-radius:12px;margin-top:6px}
 /* لكل مرحلة لون يميّزها، والتسليم والاكتمال بالأخضر */
 .s0{--st:var(--t0);--stb:var(--t0b)}.s1{--st:var(--t1);--stb:var(--t1b)}.s2{--st:var(--t2);--stb:var(--t2b)}.s3{--st:var(--t3);--stb:var(--t3b)}.s4{--st:var(--t4);--stb:var(--t4b)}.s5,.s6{--st:var(--t5);--stb:var(--t5b)}
 .badge{display:inline-flex;align-items:center;gap:6px;background:var(--stb,var(--soft));color:var(--st,var(--ink));border-radius:99px;padding:2px 10px;font-size:12.5px;font-weight:600;white-space:nowrap}
@@ -234,7 +242,7 @@ function si(st){var i=STATUSES.indexOf(st);return i<0?0:i}
 function today(){var d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
 function get(id){return D.orders.filter(function(o){return o.id===id})[0]}
 function go(v,id){view=v;if(id!==undefined)curId=id;render();window.scrollTo(0,0)}
-function render(){var a=document.getElementById("app");a.innerHTML=view==="home"?home():view==="form"?form():view==="batches"?batchPage():detail();if(view==="form")upd()}
+function render(){var a=document.getElementById("app");a.innerHTML=view==="home"?home():view==="form"?form():view==="batches"?batchPage():view==="quote"?quotePage():detail();if(view==="form")upd()}
 
 function home(){
  var act=0,rec=0,t=0,p=0,r=0,pf=0,pAll=0;
@@ -244,7 +252,7 @@ function home(){
  return'<div class="head"><div class="logo">'+ic("bag")+'</div><div class="ht"><b>شي إن ستور</b><small>طلبات الزبائن والدفعات</small></div><button class="out" onclick="doLogout()">خروج</button></div>'+
  '<div class="bal"><small>المتبقي عند الزبائن</small><b>'+num(r)+'<span>'+esc(D.cur)+'</span></b><div class="meter"><i style="width:'+pct+'%"></i></div><em><span>حُصّل '+pct+'%</span><span>من '+money(t)+'</span></em></div>'+
  '<div class="stats"><div class="k1"><span class="si">'+ic("bag")+'</span><span class="sv"><small>طلبات جارية</small><b>'+act+'</b></span></div><div class="k2"><span class="si">'+ic("box")+'</span><span class="sv"><small>طلبات مستلمة</small><b>'+rec+'</b></span></div><div class="k4"><span class="si">'+ic("cash")+'</span><span class="sv"><small>المقبوض</small><b>'+money(pAll)+'</b></span></div><div class="k3"><span class="si">'+ic("trend")+'</span><span class="sv"><small>الربح المتوقع</small><b class="ok-t">'+money(pf)+'</b></span></div></div>'+
- ibox()+'<div class="bar" style="margin-top:16px"><button class="btn" onclick="newOrder()">طلب جديد</button><button class="btn sec" onclick="go(\'batches\')">تجميع سلة</button><button class="btn sec" onclick="exportAll()">تقرير PDF</button></div>'+
+ ibox()+'<div class="bar grid2" style="margin-top:16px"><button class="btn" onclick="newOrder()">طلب جديد</button><button class="btn sec" onclick="openQuote()">فاتورة مبدئية</button><button class="btn sec" onclick="go(\'batches\')">تجميع سلة</button><button class="btn sec" onclick="exportAll()">تقرير PDF</button></div>'+
  '<div class="row"><input id="q" placeholder="بحث بالاسم أو الهاتف" aria-label="بحث بالاسم أو الهاتف أو رقم الطلب" value="'+esc(fQ)+'" oninput="fQ=this.value;list()"><select onchange="fS=this.value;list()">'+opts+'</select></div>'+
  '<div id="list" style="margin-top:10px">'+listHtml()+'</div>'+
  '<details><summary>الإعدادات والنسخة الاحتياطية</summary>'+
@@ -436,5 +444,6 @@ document.getElementById("app").innerHTML='<div class="empty">جارٍ التحم
 regSW();
 </script>
 <script src="batch.js"></script>
+<script src="quote.js"></script>
 </body>
 </html>
