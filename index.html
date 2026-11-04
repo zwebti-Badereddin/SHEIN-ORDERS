@@ -74,9 +74,11 @@ label{display:block;font-size:13.5px;color:var(--mut);margin:14px 0 5px}
 .bar{display:flex;gap:8px;margin:14px 0}.bar>.btn{flex:1}
 .bar.grid2{display:grid;grid-template-columns:1fr 1fr}
 /* صفوف منتجات الفاتورة المبدئية */
-.qhead,.qrow{display:grid;grid-template-columns:1fr 64px 96px 36px;gap:6px;align-items:center}
+/* كل منتج: الاسم في سطر، ثم الكمية والسعر بالدولار والسعر بالدينار */
+.qhead,.qrow{display:grid;grid-template-columns:64px 1fr 1fr 32px;gap:6px;align-items:center}
 .qhead{font-size:12.5px;color:var(--mut);padding:0 4px 4px}
-.qrow{margin-bottom:6px}.qrow input{min-height:42px;padding:8px 10px}.qrow .qq{text-align:center}
+.qitem{border:1px solid var(--line);border-radius:14px;padding:8px;margin-bottom:8px;background:var(--card)}.qitem .qd{border:0;min-height:36px;padding:4px 6px;font-size:14px}
+.qrow input{min-height:42px;padding:8px 10px}.qrow .qq{text-align:center}.qrow .ql{background:var(--soft);color:var(--ink);font-weight:600}
 .qpick{display:block;margin:14px 0 0;cursor:pointer}.qpick input{position:absolute;width:1px;height:1px;opacity:0}.qpick .btn{display:flex;align-items:center;justify-content:center;gap:8px}.qpick:focus-within .btn{outline:2px solid var(--acc);outline-offset:2px}
 .qocr{font-size:13.5px;color:var(--ok);background:var(--okbg);border-radius:10px;padding:8px 12px;margin-top:8px}.qocr:empty{display:none}.qocr.bad{color:var(--warn);background:var(--warnbg)}
 .qrow .qwarn{border-color:var(--warn);background:var(--warnbg);color:var(--warn);font-weight:600}
