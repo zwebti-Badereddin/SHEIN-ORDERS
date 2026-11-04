@@ -83,6 +83,7 @@ label{display:block;font-size:13.5px;color:var(--mut);margin:14px 0 5px}
 .qocr{font-size:13.5px;color:var(--ok);background:var(--okbg);border-radius:10px;padding:8px 12px;margin-top:8px}.qocr:empty{display:none}.qocr.bad{color:var(--warn);background:var(--warnbg)}
 .qrow .qwarn{border-color:var(--warn);background:var(--warnbg);color:var(--warn);font-weight:600}
 .qshots{margin:4px 0 8px;background:none;border:0;padding:0}.qshots summary{min-height:36px;font-size:14px}.qshots img{display:block;width:100%;max-width:360px;margin:6px auto;border:1px solid var(--line);border-radius:12px}
+.bkpick{margin:0;display:flex;align-items:center;justify-content:center;flex:1}.bkrow{align-items:center}.bkrow .btn{min-height:36px;padding:4px 14px;flex:none}
 .qimg{display:block;width:100%;border:1px solid var(--line);border-radius:12px;margin-top:6px}
 /* لكل مرحلة لون يميّزها، والتسليم والاكتمال بالأخضر */
 .s0{--st:var(--t0);--stb:var(--t0b)}.s1{--st:var(--t1);--stb:var(--t1b)}.s2{--st:var(--t2);--stb:var(--t2b)}.s3{--st:var(--t3);--stb:var(--t3b)}.s4{--st:var(--t4);--stb:var(--t4b)}.s5,.s6{--st:var(--t5);--stb:var(--t5b)}
@@ -181,20 +182,23 @@ function merge(r){var L=D,pref=n(L.ts)>n(r.ts)?L:r,oth=pref===L?r:L,sq=Math.max(
  var last=has(L.sync)?n(L.sync):Math.min(n(L.ts),n(r.ts));
  [L.del,r.del].forEach(function(x){Object.keys(x||{}).forEach(function(k){del[k]=Math.max(n(del[k]),n(x[k]))})});
  function pick(la,ra){var lm={},rm={},out={};(la||[]).forEach(function(x){lm[x.id]=x});(ra||[]).forEach(function(x){rm[x.id]=x});
-  Object.keys(rm).forEach(function(k){if(del[k])return;var lo=lm[k],ro=rm[k];out[k]=!lo?ro:(n(lo.mts)!==n(ro.mts)?(n(lo.mts)>n(ro.mts)?lo:ro):(pref===L?lo:ro))});
-  Object.keys(lm).forEach(function(k){if(del[k]||rm[k])return;if(stamp(lm[k])>last)out[k]=lm[k]});
+  // سجل الحذف يزيل العنصر إلا إذا عُدّل أو استُعيد بعد وقت الحذف
+  function gone(k,x){return del[k]&&n(del[k])>=stamp(x)}
+  Object.keys(rm).forEach(function(k){var lo=lm[k],ro=rm[k],x=!lo?ro:(n(lo.mts)!==n(ro.mts)?(n(lo.mts)>n(ro.mts)?lo:ro):(pref===L?lo:ro));if(!gone(k,x))out[k]=x});
+  Object.keys(lm).forEach(function(k){if(rm[k]||gone(k,lm[k]))return;if(stamp(lm[k])>last)out[k]=lm[k]});
   return out}
  var om=pick(L.orders,r.orders),all=Object.keys(om).map(function(k){sq=Math.max(sq,n(om[k].no));return om[k]});
  // طلبان أُنشئا على جهازين دون اتصال قد يحملان نفس الرقم: يبقى الأقدم ويُعاد ترقيم الأحدث
  var seen={};all.slice().sort(function(a,b){return String(a.id).localeCompare(String(b.id))}).forEach(function(o){if(seen[o.no])o.no=++sq;seen[o.no]=1});
  var bm=pick(L.batches,r.batches),bs=Object.keys(bm).map(function(k){var b=bm[k];b.orderIds=(b.orderIds||[]).filter(function(id){return !!om[id]});return b});
  all.forEach(function(o){if(o.batchId&&!bm[o.batchId])delete o.batchId});
+ Object.keys(del).forEach(function(k){if(om[k]||bm[k])delete del[k]});
  D={orders:all,batches:bs,del:del,sync:n(r.ts),cur:pref.cur||"د.ل",seq:sq,rate:pref.rate||oth.rate||"",kgp:pref.kgp||oth.kgp||""};save();if(view!=="form")render()}
 function onSnap(snap){
- if(!snap.exists){cloud.first=true;if(D.orders.length)push();else setSync("ok");return}
+ if(!snap.exists){cloud.first=true;if(D.orders.length){push();setTimeout(function(){if(window.bkAuto)bkAuto()},4000)}else setSync("ok");return}
  var r;try{r=JSON.parse(snap.data().json)}catch(e){setSync("err");return}
  if(!r||!r.orders){return}
- if(!cloud.first){cloud.first=true;
+ if(!cloud.first){cloud.first=true;setTimeout(function(){if(window.bkAuto)bkAuto()},4000);
   if(D.orders.length&&n(D.ts)!==n(r.ts))merge(r);
   else if(n(r.ts)>n(D.ts))adopt(r);
   else setSync("ok");return}
@@ -214,7 +218,9 @@ function doLogout(){if(!confirm("تسجيل الخروج؟ ستُحذف نسخة
  function out(){try{localStorage.removeItem(k)}catch(e){}auth.signOut()}
  if(!cloud.ref){out();return}
  cloud.ref.set({json:JSON.stringify(D),ts:D.ts||Date.now()}).then(out,function(){if(confirm("تعذّر رفع آخر التعديلات إلى الحساب. إذا خرجت الآن قد تضيع. الخروج على أي حال؟"))out()})}
-auth.onAuthStateChanged(function(u){
+// يبدأ متابعة تسجيل الدخول بعد تحميل كل ملفات التطبيق (batch.js وquote.js وbackup.js)،
+// وإلا قد يُعرض الحساب قبل اكتمالها على اتصال بطيء فتتعطل الصفحة
+function startAuth(){auth.onAuthStateChanged(function(u){
  if(unsub){unsub();unsub=null}
  cloud.ref=null;cloud.first=false;clearTimeout(cloud.timer);cloud.timer=null;cloud.sent={};
  if(!u){D={orders:[],batches:[],del:{},cur:"د.ل",seq:0};view="home";showLogin();return}
@@ -223,7 +229,8 @@ auth.onAuthStateChanged(function(u){
  if(!D.cur)D.cur="د.ل";if(!Array.isArray(D.batches))D.batches=[];if(!D.del)D.del={};view="home";render();
  cloud.ref=fdb.doc("users/"+u.uid+"/data/store");setSync("wait");
  unsub=cloud.ref.onSnapshot(onSnap,function(){setSync("err")});
-});
+})}
+if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",startAuth);else startAuth();
 function esc(t){return String(t==null?"":t).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
 function n(v){return Number(v)||0}
 function has(v){return v!==undefined&&v!==null&&v!==""}
@@ -263,7 +270,8 @@ function home(){
  '<label>العملة</label><input value="'+esc(D.cur)+'" onchange="D.cur=this.value;save();render()">'+
  '<label>سعر الصرف الافتراضي (دينار لكل $1)</label><input inputmode="decimal" value="'+esc(D.rate||"")+'" onchange="D.rate=this.value;save()">'+
  '<label>سعر الشحن لكل كيلو ($)</label><input inputmode="decimal" value="'+esc(has(D.kgUsd)?D.kgUsd:"5.5")+'" onchange="D.kgUsd=this.value;save()">'+
- '<label>نسخة احتياطية يدوية اختيارية: انسخ النص أدناه واحتفظ به، أو الصقه هنا لاستعادته.</label>'+
+ bkHtml()+
+ '<label>متقدم: نص البيانات، تستطيع نسخه أو لصق نص سابق لاستعادته.</label>'+
  '<textarea id="bk" dir="ltr">'+esc(JSON.stringify(D))+'</textarea>'+
  '<div class="bar"><button class="btn sec" onclick="copyBk()">نسخ</button><button class="btn sec" onclick="restoreBk()">استعادة من النص</button></div></details>';
 }
@@ -275,7 +283,7 @@ function listHtml(){
 }
 function list(){document.getElementById("list").innerHTML=listHtml()}
 function copyBk(){var t=document.getElementById("bk");t.select();try{navigator.clipboard.writeText(t.value)}catch(e){try{document.execCommand("copy")}catch(e2){}}alert("تم النسخ")}
-function restoreBk(){try{var d=JSON.parse(document.getElementById("bk").value);if(!Array.isArray(d.orders))throw 0;if(!Array.isArray(d.batches))d.batches=[];if(!d.del)d.del={};if(confirm("سيتم استبدال البيانات الحالية. متابعة؟")){D=d;save();render()}}catch(e){alert("النص غير صالح")}}
+function restoreBk(){var d;try{d=JSON.parse(document.getElementById("bk").value);if(!Array.isArray(d.orders))throw 0}catch(e){alert("النص غير صالح");return}if(confirm("سيتم استبدال البيانات الحالية، وتُحفظ نسخة منها أولاً. متابعة؟"))bkApply(d,"تمت الاستعادة.")}
 
 function newOrder(){draft={id:"",accountingV:3,name:"",phone:"",cart:"",sheinNo:"",city:"",address:"",bookDate:today(),pcs:"",usd:"",actualUsd:"",rate:D.rate||"",kg:"",kgUsd:has(D.kgUsd)?D.kgUsd:"5.5",shipUsd:"",shipFee:"",shipCo:"",price:"",deposit:"",method:METHODS[0],status:STATUSES[0],notes:"",items:[],pays:[]};go("form")}
 function form(){
@@ -449,5 +457,6 @@ regSW();
 </script>
 <script src="batch.js"></script>
 <script src="quote.js"></script>
+<script src="backup.js"></script>
 </body>
 </html>
