@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>طلبات شي إن</title>
 <link rel="manifest" href="manifest.webmanifest">
-<meta name="theme-color" content="#f4f6f9">
+<meta name="theme-color" content="#ffffff">
 <meta name="color-scheme" content="light">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" href="icon-192.png">
@@ -13,19 +13,19 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="طلبات شي إن">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap">
 <style>
-/* أساس محايد وأزرق للأزرار، وكل مؤشر وحالة بلون خاص: أخضر للمسدَّد وكهرماني للمتبقي */
-:root{--bg:#f4f6f9;--card:#fff;--ink:#1e2633;--mut:#667085;--line:#e3e7ee;--soft:#eef1f6;
---acc:#2457c5;--acc-ink:#fff;--acc-soft:#e6edfb;--ok:#12806b;--okbg:#e2f4ef;--warn:#b4620b;--warnbg:#fdf0dc;--bad:#c2343f;--badbg:#fce8ea;
---hero:#1b2a4a;--hero-ink:#fff;--fill:#4fd1b5;
---k1:#2457c5;--k1b:#e6edfb;--k2:#7048c8;--k2b:#efe9fb;--k3:#12806b;--k3b:#e2f4ef;--k4:#b4620b;--k4b:#fdf0dc;
---t0:#5b6475;--t0b:#eceff4;--t1:#b4620b;--t1b:#fdf0dc;--t2:#7048c8;--t2b:#efe9fb;--t3:#2457c5;--t3b:#e6edfb;--t4:#0e7f9a;--t4b:#e0f3f8;--t5:#12806b;--t5b:#e2f4ef;
+/* تصميم «مراحل الطلب»: أبيض هادئ، فيروزي للأزرار، ولكل مرحلة لون يظهر في الشريط والبطاقات */
+:root{--bg:#ffffff;--card:#fff;--ink:#1c2230;--mut:#677084;--line:#e8ebf1;--soft:#f4f7f8;
+--acc:#0e7c86;--acc-ink:#fff;--acc-soft:#ddf1f2;--ok:#0f7a55;--okbg:#ddf3e9;--warn:#b45309;--warnbg:#fdf1e4;--bad:#c2343f;--badbg:#fce8ea;
+--hero:#0e7c86;--hero-ink:#fff;--fill:#5eeab0;
+--k1:#2f5fc4;--k1b:#e7ecff;--k2:#6d3fc8;--k2b:#f1e9ff;--k3:#0f7a55;--k3b:#ddf3e9;--k4:#b45309;--k4b:#fff1dc;
+--t0:#5b6475;--t0b:#eef0f4;--t1:#b45309;--t1b:#fff1dc;--t2:#6d3fc8;--t2b:#f1e9ff;--t3:#2f5fc4;--t3b:#e7ecff;--t4:#0b6e80;--t4b:#dff3f6;--t5:#0f7a55;--t5b:#ddf5ea;
 color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 html{scroll-padding-top:env(safe-area-inset-top,0px);-webkit-text-size-adjust:100%}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font-family:"IBM Plex Sans Arabic",Tahoma,Arial,sans-serif;font-size:15px;line-height:1.6;font-variant-numeric:tabular-nums;-webkit-font-smoothing:antialiased}
-main{max-width:620px;margin:0 auto;padding:12px 16px 96px}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Tajawal",Tahoma,Arial,sans-serif;font-size:15px;line-height:1.6;font-variant-numeric:tabular-nums;-webkit-font-smoothing:antialiased}
+main{max-width:620px;margin:0 auto;padding:12px 16px 112px}
 h1{font-size:22px;font-weight:700;margin:4px 0 8px;letter-spacing:-.2px}h1 .no{font-size:15px;font-weight:500;color:var(--mut)}
 h2{font-size:15px;font-weight:600;margin:24px 0 8px;color:var(--mut)}
 /* شاشة الدخول ورأس الصفحة */
@@ -96,14 +96,41 @@ label{display:block;font-size:13.5px;color:var(--mut);margin:14px 0 5px}
 i.mreal,.mleg i.mreal{background:var(--ok)}i.mexp,.mleg i.mexp{background:color-mix(in srgb,var(--ok) 35%,var(--card))}
 .mleg{display:flex;gap:16px;font-size:12.5px;color:var(--mut);margin-top:8px}.mleg i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-inline-end:6px;vertical-align:-1px}
 .mcard.mnow{border-color:var(--acc)}.mcard .line b{font-size:15px}
+/* الرئيسية */
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:2px 0 12px}
+.toplogo{height:72px;width:auto;display:block}.top .btn{display:flex;align-items:center;gap:6px;flex:none}
+.sums{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.sumc{border-radius:20px;padding:14px 16px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.sumc.owe{background:#fde7d6;color:#7a3410}.sumc.prof{background:#ddf3e9;color:#0b5a3d}
+.sic{width:34px;height:34px;border-radius:11px;background:rgba(255,255,255,.7);display:grid;place-items:center}.owe .sic{color:#c2410c}.prof .sic{color:#0f7a55}
+.sumc small{font-size:13px}.owe small,.owe .sub{color:#8a4a26}.prof small,.prof .sub{color:#2f6b53}
+.sumc b{font-size:25px;font-weight:700;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.sumc b em{font-style:normal;font-size:13px;font-weight:500}.sumc .sub{font-size:12px}
+.sec-t{display:flex;justify-content:space-between;align-items:baseline;margin:18px 2px 8px}.sec-t b{font-size:15px}.sec-t span{font-size:12px;color:var(--mut)}
+.stages{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:4px}
+.stg{border:0;background:none;font:inherit;color:var(--ink);display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 3px;border-radius:12px;cursor:pointer;min-height:62px}
+.stg i{display:block;width:100%;height:6px;border-radius:99px;background:var(--st)}.stg b{font-size:18px;line-height:1.2}.stg span{font-size:11px;color:#4b5468;white-space:nowrap}
+.stg.on{background:var(--stb)}.stg.on span{color:var(--st);font-weight:700}
+.grp{font-size:13px;font-weight:700;margin:16px 2px 8px}.grp.due{color:var(--warn)}.grp.paid{color:var(--ok)}
+.ocard{display:flex;gap:12px;align-items:center;width:100%;text-align:right;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px;margin-bottom:10px;cursor:pointer;font:inherit;color:inherit}
+.ocard:active{background:var(--soft)}
+.av{width:44px;height:44px;border-radius:14px;background:var(--stb);color:var(--st);display:grid;place-items:center;font-weight:700;font-size:17px;flex:none}
+.ob{flex:1;min-width:0;display:flex;flex-direction:column;gap:6px}
+.o1,.o2{display:flex;justify-content:space-between;gap:8px;align-items:center}.o1 b:first-child{font-size:15px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.o1 b:last-child{font-size:14px;white-space:nowrap}
+.o2{font-size:12px;color:#5b6280}.o2 span:first-child{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.o2 span:last-child{white-space:nowrap}
+.pbar{display:block;height:5px;border-radius:99px;background:#eef0f6;overflow:hidden}.pbar i{display:block;height:100%;border-radius:99px;background:var(--st)}
+.srch{position:relative;margin-top:14px}.srch .ic{position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--mut)}.srch input{padding-right:40px}
+/* الشريط السفلي */
+.nav{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(12px + env(safe-area-inset-bottom,0px));width:min(588px,calc(100% - 32px));background:#1c2230;border-radius:22px;padding:6px;display:grid;grid-template-columns:repeat(4,1fr);gap:4px;z-index:40;box-shadow:0 8px 24px rgba(28,34,48,.25)}
+.nav button{border:0;border-radius:16px;background:none;color:#c7cdda;font:inherit;font-size:12px;min-height:50px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer}
+.nav button.on{background:var(--acc);color:#fff;font-weight:700}.nav .ic{width:20px;height:20px}
+.logout{margin-top:18px}
 .qimg{display:block;width:100%;border:1px solid var(--line);border-radius:12px;margin-top:6px}
 /* لكل مرحلة لون يميّزها، والتسليم والاكتمال بالأخضر */
 .s0{--st:var(--t0);--stb:var(--t0b)}.s1{--st:var(--t1);--stb:var(--t1b)}.s2{--st:var(--t2);--stb:var(--t2b)}.s3{--st:var(--t3);--stb:var(--t3b)}.s4{--st:var(--t4);--stb:var(--t4b)}.s5,.s6{--st:var(--t5);--stb:var(--t5b)}
 .badge{display:inline-flex;align-items:center;gap:6px;background:var(--stb,var(--soft));color:var(--st,var(--ink));border-radius:99px;padding:2px 10px;font-size:12.5px;font-weight:600;white-space:nowrap}
 .badge:before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
 /* قائمة الطلبات: سطح واحد مقسّم بخطوط رفيعة */
-#list{background:var(--card);border:1px solid var(--line);border-radius:18px;overflow:hidden}
-#list:has(.empty){background:none;border-style:dashed}
+#list{margin-top:4px}
 .order{display:block;width:100%;text-align:right;background:none;border:0;border-bottom:1px solid var(--line);border-inline-start:3px solid var(--st,var(--line));padding:13px 16px 13px 16px;cursor:pointer}
 .order:last-child{border-bottom:0}
 .order:hover{background:var(--soft)}
@@ -144,21 +171,21 @@ textarea{min-height:90px;font-size:13px}
 @page{margin:14mm}
 body{background:#fff!important;color:#000!important}
 main,.sync{display:none!important}
-#print{display:block;direction:rtl;font-family:"IBM Plex Sans Arabic",Tahoma,Arial,sans-serif;color:#23262d;background:#fff;font-size:13px}
+#print{display:block;direction:rtl;font-family:"Tajawal",Tahoma,Arial,sans-serif;color:#23262d;background:#fff;font-size:13px}
 #print h1{font-size:20px;margin:0 0 6px}#print h2{font-size:15px;margin:16px 0 6px}#print p{margin:3px 0}
 #print table{width:100%;border-collapse:collapse;margin-top:8px}
 #print th,#print td{border:1px solid #d3d9e3;padding:6px 8px;text-align:right}
-#print th,#print tfoot td{background:#e8edf6;font-weight:700;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+#print th,#print tfoot td{background:#e3f3f2;font-weight:700;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 #print .sum td:first-child{width:40%;font-weight:700}
-.inv-head{display:flex;justify-content:space-between;align-items:center;gap:16px;border-bottom:2px solid #1b2a4a;padding-bottom:10px;margin-bottom:12px}
+.inv-head{display:flex;justify-content:space-between;align-items:center;gap:16px;border-bottom:2px solid #0b5f66;padding-bottom:10px;margin-bottom:12px}
 .inv-head img{height:120px;width:auto}
 .inv-meta{border:1px solid #d3d9e3;border-radius:10px;padding:8px 16px;text-align:center;line-height:1.9;min-width:190px}
-.inv-t{font-size:22px;font-weight:700;color:#1b2a4a}
+.inv-t{font-size:22px;font-weight:700;color:#0b5f66}
 .inv-cust{border:1px solid #d3d9e3;border-radius:10px;padding:8px 14px;margin:10px 0;line-height:1.9}
 .rep-logo img{height:80px;width:auto;margin-bottom:6px}
 .note{font-size:12px;color:#555}
 .inv-foot{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;margin-top:30px;border-top:1px solid #d3d9e3;padding-top:14px;break-inside:avoid}
-.stamp{width:150px;height:150px;border:3px double #1b2a4a;border-radius:50%;color:#1b2a4a;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;transform:rotate(-8deg);box-shadow:inset 0 0 0 5px #fff,inset 0 0 0 6px #1b2a4a;line-height:1.35;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.stamp{width:150px;height:150px;border:3px double #0b5f66;border-radius:50%;color:#0b5f66;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;transform:rotate(-8deg);box-shadow:inset 0 0 0 5px #fff,inset 0 0 0 6px #0b5f66;line-height:1.35;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 .stamp b{font-size:18px}.stamp i{font-style:normal;font-size:9px;letter-spacing:.5px}.stamp span{font-size:14px;font-weight:700;margin-top:3px}.stamp em{font-style:normal;font-size:10px}
 }
 </style>
@@ -261,25 +288,34 @@ pin:'<path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 1 1 16 0z"/><circle cx="12" c
 dl:'<path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/>',
 x:'<path d="M18 6 6 18M6 6l12 12"/>',
 bell:'<path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>',
-send:'<path d="m22 2-7 20-4-9-9-4z"/><path d="M22 2 11 13"/>'};
+send:'<path d="m22 2-7 20-4-9-9-4z"/><path d="M22 2 11 13"/>',
+plus:'<path d="M12 5v14M5 12h14"/>',home:'<path d="M3 10.5 12 3l9 7.5V21H3z"/><path d="M9 21v-6h6v6"/>',
+receipt:'<path d="M6 2h12v20l-3-2-3 2-3-2-3 2z"/><path d="M9 7h6M9 11h6M9 15h4"/>',layers:'<path d="m12 3 9 5-9 5-9-5z"/><path d="m3 13 9 5 9-5"/>',
+chart:'<path d="M4 19V9M10 19V5M16 19v-7M22 19H2"/>',search:'<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>'};
 function ic(k){return'<svg class="ic" viewBox="0 0 24 24" aria-hidden="true">'+IC[k]+'</svg>'}
 function si(st){var i=STATUSES.indexOf(st);return i<0?0:i}
 function today(){var d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
 function get(id){return D.orders.filter(function(o){return o.id===id})[0]}
 function go(v,id){view=v;if(id!==undefined)curId=id;render();window.scrollTo(0,0)}
-function render(){var a=document.getElementById("app");a.innerHTML=view==="home"?home():view==="form"?form():view==="batches"?batchPage():view==="quote"?quotePage():view==="remind"?remindPage():view==="reports"?reportsPage():detail();if(view==="form")upd()}
+function render(){var a=document.getElementById("app");a.innerHTML=view==="home"?home():view==="form"?form():view==="batches"?batchPage():view==="quote"?quotePage():view==="remind"?remindPage():view==="reports"?reportsPage():detail();if(["home","quote","batches","reports","remind"].indexOf(view)>=0)a.innerHTML+=navHtml();if(view==="form")upd()}
+function navHtml(){var it=[["home","الطلبات","home"],["quote","فاتورة","receipt"],["batches","التجميع","layers"],["reports","التقارير","chart"]];
+ return'<nav class="nav" aria-label="الأقسام">'+it.map(function(x){var on=view===x[0]||(x[0]==="home"&&view==="remind");return'<button class="'+(on?"on":"")+'"'+(on?' aria-current="page"':'')+' onclick="'+(x[0]==="quote"?"openQuote()":"go(\'"+x[0]+"\')")+'">'+ic(x[2])+'<span>'+x[1]+'</span></button>'}).join("")+'</nav>'}
 
+var STAGES=[["جديد","جديد"],["عربون","تم دفع العربون"],["طُلب","تم الطلب من SHEIN"],["شحن","في الشحن"],["وصل","وصل"],["سُلّم","__done"]];
+function stIdx(o){return Math.min(5,si(o.status))}
+function pickStage(v){fS=fS===v?"":v;render()}
 function home(){
- var act=0,rec=0,t=0,p=0,r=0,pf=0,pAll=0;
- D.orders.forEach(function(o){var c=calc(o);pAll+=c.paid;if(o.status==="تم التسليم"||o.status==="مكتمل")rec++;else act++;if(o.status==="مكتمل")return;t+=c.tot;p+=c.paid;r+=c.rem;if(c.profit!==null)pf+=c.profit});
+ var t=0,p=0,r=0,pf=0,act=0,cnt=[0,0,0,0,0,0];
+ D.orders.forEach(function(o){var c=calc(o);cnt[stIdx(o)]++;if(!isDoneSt(o))act++;if(o.status==="مكتمل")return;t+=c.tot;p+=c.paid;r+=c.rem;if(c.profit!==null)pf+=c.profit});
  var pct=t>0?Math.min(100,Math.max(0,Math.round(p/t*100))):0;
- var opts='<option value="">كل الحالات</option><option value="__unpaid"'+(fS==="__unpaid"?" selected":"")+'>غير مسددة فقط</option>'+STATUSES.map(function(s){return'<option'+(s===fS?" selected":"")+'>'+s+'</option>'}).join("");
- return'<div class="head"><div class="logo">'+ic("bag")+'</div><div class="ht"><b>شي إن ستور</b><small>طلبات الزبائن والدفعات</small></div><button class="out" onclick="doLogout()">خروج</button></div>'+
- '<div class="bal"><small>المتبقي عند الزبائن</small><b>'+num(r)+'<span>'+esc(D.cur)+'</span></b><div class="meter"><i style="width:'+pct+'%"></i></div><em><span>حُصّل '+pct+'%</span><span>من '+money(t)+'</span></em></div>'+
- '<div class="stats"><div class="k1"><span class="si">'+ic("bag")+'</span><span class="sv"><small>طلبات جارية</small><b>'+act+'</b></span></div><div class="k2"><span class="si">'+ic("box")+'</span><span class="sv"><small>طلبات مستلمة</small><b>'+rec+'</b></span></div><div class="k4"><span class="si">'+ic("cash")+'</span><span class="sv"><small>المقبوض</small><b>'+money(pAll)+'</b></span></div><div class="k3"><span class="si">'+ic("trend")+'</span><span class="sv"><small>الربح المتوقع</small><b class="ok-t">'+money(pf)+'</b></span></div></div>'+
- ibox()+'<div class="bar grid2" style="margin-top:16px"><button class="btn" onclick="newOrder()">طلب جديد</button><button class="btn sec" onclick="openQuote()">فاتورة مبدئية</button><button class="btn sec" onclick="go(\'batches\')">تجميع سلة</button><button class="btn sec" onclick="go(\'reports\')">التقارير</button></div>'+remindBanner()+''+
- '<div class="row"><input id="q" placeholder="بحث بالاسم أو الهاتف" aria-label="بحث بالاسم أو الهاتف أو رقم الطلب" value="'+esc(fQ)+'" oninput="fQ=this.value;list()"><select onchange="fS=this.value;list()">'+opts+'</select></div>'+
- '<div id="list" style="margin-top:10px">'+listHtml()+'</div>'+
+ return'<div class="top"><img class="toplogo" src="logo.png" alt="شي إن ستور للمنتجات المتنوعة"><button class="btn" onclick="newOrder()">'+ic("plus")+' طلب جديد</button></div>'+
+ '<div class="sums"><div class="sumc owe"><span class="sic">'+ic("wallet")+'</span><small>المتبقي عند الزبائن</small><b>'+num(r)+' <em>'+esc(D.cur)+'</em></b><span class="sub">حُصّل '+pct+'% من '+num(t)+'</span></div>'+
+ '<div class="sumc prof"><span class="sic">'+ic("trend")+'</span><small>الربح المتوقع</small><b>'+num(pf)+' <em>'+esc(D.cur)+'</em></b><span class="sub">'+act+' طلب جارٍ</span></div></div>'+
+ ibox()+'<div style="margin-top:12px">'+remindBanner()+'</div>'+
+ '<div class="sec-t"><b>مراحل الطلبات</b><span>'+(fS?'<a href="#" onclick="pickStage(\'\');return false">عرض الكل</a>':D.orders.length+' طلب')+'</span></div>'+
+ '<div class="stages">'+STAGES.map(function(x,i){return'<button class="stg s'+i+(fS===x[1]?' on':'')+'" onclick="pickStage(\''+x[1]+'\')"'+(fS===x[1]?' aria-pressed="true"':' aria-pressed="false"')+'><i></i><b>'+cnt[i]+'</b><span>'+x[0]+'</span></button>'}).join("")+'</div>'+
+ '<div class="srch">'+ic("search")+'<input id="q" placeholder="ابحث بالاسم أو الهاتف أو رقم الطلب" aria-label="بحث بالاسم أو الهاتف أو رقم الطلب" value="'+esc(fQ)+'" oninput="fQ=this.value;list()"></div>'+
+ '<div id="list">'+listHtml()+'</div>'+
  '<details><summary>الإعدادات والنسخة الاحتياطية</summary>'+
  '<label>العملة</label><input value="'+esc(D.cur)+'" onchange="D.cur=this.value;save();render()">'+
  '<label>سعر الصرف الافتراضي (دينار لكل $1)</label><input inputmode="decimal" value="'+esc(D.rate||"")+'" onchange="D.rate=this.value;save()">'+
@@ -287,14 +323,21 @@ function home(){
  bkHtml()+
  '<label>متقدم: نص البيانات، تستطيع نسخه أو لصق نص سابق لاستعادته.</label>'+
  '<textarea id="bk" dir="ltr">'+esc(JSON.stringify(D))+'</textarea>'+
- '<div class="bar"><button class="btn sec" onclick="copyBk()">نسخ</button><button class="btn sec" onclick="restoreBk()">استعادة من النص</button></div></details>';
+ '<div class="bar"><button class="btn sec" onclick="copyBk()">نسخ</button><button class="btn sec" onclick="restoreBk()">استعادة من النص</button></div>'+
+ '<button class="btn bad full logout" onclick="doLogout()">تسجيل الخروج</button></details>';
 }
-function visible(){var q=fQ.trim().toLowerCase();return D.orders.filter(function(o){return(!fS||(fS==="__unpaid"?calc(o).rem>0:o.status===fS))&&(!q||(o.name+" "+o.phone+" "+(o.sheinNo||"")+" "+fno(o)+" "+(o.city||"")).toLowerCase().indexOf(q)>-1)})}
+function isDoneSt(o){return o.status==="تم التسليم"||o.status==="مكتمل"}
+function visible(){var q=fQ.trim().toLowerCase();return D.orders.filter(function(o){return(!fS||(fS==="__unpaid"?calc(o).rem>0:fS==="__done"?isDoneSt(o):o.status===fS))&&(!q||(o.name+" "+o.phone+" "+(o.sheinNo||"")+" "+fno(o)+" "+(o.city||"")).toLowerCase().indexOf(q)>-1)})}
+function ocard(o){var c=calc(o),i=stIdx(o),pp=c.tot>0?Math.min(100,Math.max(0,Math.round(c.paid/c.tot*100))):0,due=c.rem>0.009&&o.status!=="مكتمل";
+ return'<button class="ocard s'+i+'" onclick="go(\'detail\',\''+o.id+'\')"><span class="av" aria-hidden="true">'+esc(String(o.name||"؟").trim().charAt(0)||"؟")+'</span><span class="ob">'+
+ '<span class="o1"><b>'+esc(o.name)+'</b><b class="'+(due?"rem-t":"ok-t")+'">'+(due?money(c.rem):"مسدد")+'</b></span>'+
+ '<span class="o2"><span>'+fno(o)+(o.city?' · '+esc(o.city):'')+' · '+esc(o.status)+'</span><span>'+(due?'من '+num(c.tot):money(c.tot))+'</span></span>'+
+ '<span class="pbar"><i style="width:'+pp+'%"></i></span></span></button>'}
 function listHtml(){
  var L=visible().sort(function(a,b){return b.no-a.no});
- if(!L.length)return'<div class="empty">'+(D.orders.length?"لا توجد نتائج":"لا توجد طلبات بعد. سجّل أول سلة من زر «طلب جديد».")+'</div>';
- return L.map(function(o){var c=calc(o);return'<button class="order s'+si(o.status)+'" onclick="go(\'detail\',\''+o.id+'\')"><div class="l1"><b>'+esc(o.name)+(o.city?'<span class="city">، '+esc(o.city)+'</span>':"")+'</b><span class="badge s'+si(o.status)+'">'+esc(o.status)+'</span></div><div class="l2"><span><span class="no">'+fno(o)+'</span>&ensp;'+money(c.tot)+'</span><span class="'+(c.rem>0?"rem-t":"ok-t")+'">'+(c.rem>0?"متبقي "+money(c.rem):"مسدد")+'</span></div></button>'}).join("");
-}
+ if(!L.length)return'<div class="empty">'+(D.orders.length?"لا توجد طلبات هنا":"لا توجد طلبات بعد. سجّل أول سلة من زر «طلب جديد».")+'</div>';
+ var due=L.filter(function(o){return calc(o).rem>0.009&&o.status!=="مكتمل"}),paid=L.filter(function(o){return due.indexOf(o)<0});
+ return(due.length?'<div class="grp due">تحتاج تحصيل · '+due.length+'</div>'+due.map(ocard).join(""):"")+(paid.length?'<div class="grp paid">مسددة · '+paid.length+'</div>'+paid.map(ocard).join(""):"")}
 function list(){document.getElementById("list").innerHTML=listHtml()}
 function copyBk(){var t=document.getElementById("bk");t.select();try{navigator.clipboard.writeText(t.value)}catch(e){try{document.execCommand("copy")}catch(e2){}}alert("تم النسخ")}
 function restoreBk(){var d;try{d=JSON.parse(document.getElementById("bk").value);if(!Array.isArray(d.orders))throw 0}catch(e){alert("النص غير صالح");return}if(confirm("سيتم استبدال البيانات الحالية، وتُحفظ نسخة منها أولاً. متابعة؟"))bkApply(d,"تمت الاستعادة.")}
