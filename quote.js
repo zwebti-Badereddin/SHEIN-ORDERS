@@ -77,10 +77,13 @@ function qCanvas(){var q=quote,t=qTotals(),F='"IBM Plex Sans Arabic",Tahoma,Aria
    y+=RH;L(y-2)});
   y+=30;
   // الإجماليات
-  var bx=P,bw=560;function S(k,v,big){T(k,bx+bw-20,y+29,{s:big?30:26,w:big?700:400,c:big?ink:mut});T(v,bx+20,y+29,{s:big?32:26,w:700,c:big?acc:ink,a:"left",d:"ltr"});y+=58}
+  var bx=P,bw=560;
+  // المبلغ ثم العملة، كلٌّ على حدة حتى لا ينقلب ترتيبهما
+  function V(v,cur,x,yy,o){T(v,x,yy,Object.assign({a:"left",d:"ltr"},o));if(cur){c.font=(o.w||400)+" "+(o.s||28)+"px "+F;var w=c.measureText(v).width;T(cur,x+w+10,yy,Object.assign({},o,{a:"left",d:"rtl"}))}}
+  function S(k,v,cur){T(k,bx+bw-20,y+29,{s:26,c:mut});V(v,cur,bx+20,y+29,{s:26,w:700,c:ink});y+=58}
   S("عدد القطع",String(t.pcs));S("الإجمالي بالدولار",usd2(t.usd));
-  if(t.fee>0)S("رسوم الشحن",num(t.fee)+" "+D.cur);
-  y+=8;R(bx,y,bw,76,16,"#e6edfb");T("الإجمالي بالدينار",bx+bw-24,y+38,{w:700,s:30,c:navy});T(t.rate>0?num(t.total)+" "+D.cur:"—",bx+24,y+38,{w:700,s:34,c:acc,a:"left",d:"ltr"});y+=96;
+  if(t.fee>0)S("رسوم الشحن",num(t.fee),D.cur);
+  y+=8;R(bx,y,bw,76,16,"#e6edfb");T("الإجمالي بالدينار",bx+bw-24,y+38,{w:700,s:30,c:navy});V(t.rate>0?num(t.total):"—",t.rate>0?D.cur:"",bx+24,y+38,{w:700,s:34,c:acc});y+=96;
   T("هذه فاتورة مبدئية للتسعير، والأسعار حسب الموقع يوم إصدارها وقد تتغير عند تنفيذ الطلب.",W-P,y+20,{s:22,c:mut,mw:W-2*P});y+=80;
   // التذييل: بيانات التواصل وختم المتجر
   L(y);y+=30;
