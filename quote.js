@@ -6,15 +6,17 @@ function qNew(){quote={name:"",phone:"",rate:D.rate||"",shipFee:"",items:[]};qKe
 function openQuote(){quote=quote||qLoad();if(!quote)qNew();if(!has(quote.rate))quote.rate=D.rate||"";go("quote")}
 function qTotals(){var q=quote,usd=0,pcs=0;q.items.forEach(function(i){var k=n(has(i.qty)?i.qty:1);usd+=k*n(i.usd);pcs+=k});
  var r=n(q.rate),lyd=usd*r,fee=n(q.shipFee);return{usd:usd,pcs:pcs,rate:r,lyd:lyd,fee:fee,total:lyd+fee}}
-function qRow(it,i){return'<div class="qrow"><input class="qd" placeholder="المنتج (اختياري)" value="'+esc(it.desc)+'" oninput="quote.items['+i+'].desc=this.value;qKeep()">'+
+function qRow(it,i){return'<div class="qrow"><input class="qd" dir="auto" placeholder="المنتج (اختياري)" value="'+esc(it.desc)+'" oninput="quote.items['+i+'].desc=this.value;qKeep()">'+
  '<input class="qq" inputmode="numeric" aria-label="الكمية" value="'+esc(has(it.qty)?it.qty:1)+'" oninput="quote.items['+i+'].qty=this.value;qUpd()">'+
  '<input class="qp" inputmode="decimal" dir="ltr" placeholder="$" aria-label="السعر بالدولار" value="'+esc(it.usd)+'" oninput="quote.items['+i+'].usd=this.value;qUpd()">'+
  '<button class="x" onclick="qDel('+i+')" aria-label="حذف">'+ic("x")+'</button></div>'}
 function quotePage(){var q=quote,t=qTotals();
  return'<button class="back" onclick="go(\'home\')">‹ رجوع</button><h1>فاتورة مبدئية</h1>'+
- '<p class="note">اكتب أسعار منتجات السلة بالدولار كما تظهر في الموقع، فيحسب التطبيق الإجمالي بالدينار ويجهّز فاتورة بالشعار ورقم الهاتف لإرسالها للزبون.</p>'+
+ '<p class="note">أرفق صورة السلة أو اكتب الأسعار، فيحسب التطبيق الإجمالي بالدينار ويجهّز فاتورة بالشعار ورقم الهاتف لإرسالها للزبون.</p>'+
  '<div class="row"><div><label>اسم الزبون</label><input value="'+esc(q.name)+'" oninput="quote.name=this.value;qKeep()"></div><div><label>رقم الهاتف</label><input inputmode="tel" dir="ltr" value="'+esc(q.phone)+'" oninput="quote.phone=this.value;qKeep()"></div></div>'+
- '<label>إضافة سريعة: الصق أو اكتب الأسعار مفصولة بمسافة أو سطر جديد</label><div class="row"><div style="flex:3"><input id="qbulk" dir="ltr" inputmode="decimal" placeholder="34.34 39.40 30.97 21.02"></div><div style="flex:1"><button class="btn sec" style="width:100%" onclick="qBulk()">إضافة</button></div></div>'+
+ '<label class="qpick"><input type="file" accept="image/*" multiple onchange="qOcr(this)"><span class="btn full">'+ic("dl")+' إرفاق صورة السلة</span></label>'+
+ '<p class="note" style="margin-top:6px">صوّر سلة SHEIN أو قائمة المنتجات المشتركة، ويمكن اختيار أكثر من صورة. يقرأ التطبيق الأسماء والأسعار وتراجعها قبل الإرسال.</p><div id="qocr" class="qocr"></div>'+
+ '<label>أو اكتب الأسعار مفصولة بمسافة</label><div class="row"><div style="flex:3"><input id="qbulk" dir="ltr" inputmode="decimal" placeholder="34.34 39.40 30.97 21.02"></div><div style="flex:1"><button class="btn sec" style="width:100%" onclick="qBulk()">إضافة</button></div></div>'+
  '<h2>منتجات السلة</h2><div class="qhead"><span>المنتج</span><span>الكمية</span><span>السعر</span><span></span></div><div id="qitems">'+(q.items.length?q.items.map(qRow).join(""):'<div class="empty" style="padding:12px">لا توجد منتجات بعد.</div>')+'</div>'+
  '<div class="bar"><button class="btn sec" onclick="qAdd()">+ إضافة منتج</button></div>'+
  '<div class="row"><div><label>سعر الصرف اليوم</label><input inputmode="decimal" value="'+esc(q.rate)+'" oninput="quote.rate=this.value;qUpd()"></div><div><label>رسوم الشحن على الزبون ('+esc(D.cur)+')</label><input inputmode="decimal" value="'+esc(q.shipFee)+'" placeholder="اختياري" oninput="quote.shipFee=this.value;qUpd()"></div></div>'+
@@ -42,7 +44,7 @@ function qNo(){var d=new Date(),p=function(x){return String(x).padStart(2,"0")};
 function qImg(i){return new Promise(function(res){var m=new Image();m.onload=function(){res(m)};m.onerror=function(){res(null)};m.src=i})}
 function qCanvas(){var q=quote,t=qTotals(),F='"IBM Plex Sans Arabic",Tahoma,Arial,sans-serif',W=1080,P=64,no=qNo();
  var fonts=document.fonts?Promise.all(["400 28px","600 28px","700 40px"].map(function(s){return document.fonts.load(s+' "IBM Plex Sans Arabic"').catch(function(){})})):Promise.resolve();
- return Promise.all([qImg("logo.png"),fonts]).then(function(r){var logo=r[0],rows=q.items.length,RH=62;
+ return Promise.all([qImg("logo.png"),fonts]).then(function(r){var logo=r[0],rows=q.items.length,two=q.items.some(function(i){return/ · /.test(i.desc||"")}),RH=two?84:62;
   var H=P+230+40+(q.name||q.phone?120:0)+70+rows*RH+30+(t.fee>0?5:4)*58+90+120+300;
   var cv=document.createElement("canvas");cv.width=W;cv.height=H;var c=cv.getContext("2d");
   var ink="#1e2633",mut="#667085",line="#e3e7ee",acc="#2457c5",navy="#1b2a4a";
@@ -65,7 +67,10 @@ function qCanvas(){var q=quote,t=qTotals(),F='"IBM Plex Sans Arabic",Tahoma,Aria
   T("#",cx.no,y+30,{w:600,s:24});T("المنتج",cx.item,y+30,{w:600,s:24});T("الكمية",cx.qty,y+30,{w:600,s:24,a:"center"});T("السعر",cx.pr,y+30,{w:600,s:24,a:"center"});T("الإجمالي",cx.tot+40,y+30,{w:600,s:24,a:"center"});
   y+=70;
   q.items.forEach(function(it,k){var qty=n(has(it.qty)?it.qty:1),u=n(it.usd);
-   T(String(k+1),cx.no,y+RH/2,{s:24,c:mut});T(it.desc||"منتج "+(k+1),cx.item,y+RH/2,{s:26,mw:cx.item-cx.qty-70});
+   T(String(k+1),cx.no,y+RH/2,{s:24,c:mut});
+   // الاسم بالإنجليزية يُرسم من اليسار لليمين، واللون/المقاس في سطر ثانٍ أصغر
+   var parts=String(it.desc||"منتج "+(k+1)).split(" · "),nm=parts.shift(),vr=parts.join(" · "),mw=cx.item-cx.qty-70,dl=function(t){return/^[^\u0600-\u06FF]*[A-Za-z]/.test(t)&&!/[\u0600-\u06FF]/.test(t)?"ltr":"rtl"};
+   if(vr){T(nm,cx.item,y+28,{s:25,mw:mw,d:dl(nm)});T(vr,cx.item,y+60,{s:20,c:mut,mw:mw,d:dl(vr)})}else T(nm,cx.item,y+RH/2,{s:26,mw:mw,d:dl(nm)});
    T(String(qty),cx.qty,y+RH/2,{s:26,a:"center",d:"ltr"});T(usd2(u),cx.pr,y+RH/2,{s:26,a:"center",d:"ltr"});T(usd2(u*qty),cx.tot+40,y+RH/2,{s:26,a:"center",d:"ltr",w:600});
    y+=RH;L(y-2)});
   y+=30;
@@ -104,3 +109,46 @@ function qSend(blob,fname){var f=null;try{f=new File([blob],fname,{type:blob.typ
  if(f&&navigator.canShare&&navigator.canShare({files:[f]}))return navigator.share({files:[f],title:fname}).catch(function(e){if(e&&e.name!=="AbortError")qDown(blob,fname)});
  qDown(blob,fname)}
 function qDown(blob,fname){var a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=fname;document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},2000)}
+
+// ===== قراءة صورة السلة: يتعرّف التطبيق على المنتجات والأسعار من لقطة شاشة SHEIN =====
+// تتم القراءة على الهاتف نفسه (Tesseract)، ولا تُرسل الصورة إلى أي خادم.
+var TESS="https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js";
+function qLib(){if(window.Tesseract)return Promise.resolve(window.Tesseract);return new Promise(function(res,rej){var s=document.createElement("script");s.src=TESS;s.onload=function(){res(window.Tesseract)};s.onerror=function(){rej(new Error("net"))};document.head.appendChild(s)})}
+// تكبير الصورة لعرض 1500 بكسل وأخذ القناة الخضراء (فتصبح الأسعار الحمراء داكنة) ثم رفع التباين
+function qPrep(file){return new Promise(function(res,rej){var url=URL.createObjectURL(file),im=new Image();
+ im.onload=function(){var s=Math.min(4,Math.max(1,1500/im.width));if(im.width*s*im.height*s>16e6)s=Math.sqrt(16e6/(im.width*im.height));
+  var w=Math.round(im.width*s),h=Math.round(im.height*s),cv=document.createElement("canvas");cv.width=w;cv.height=h;var c=cv.getContext("2d");c.imageSmoothingQuality="high";c.drawImage(im,0,0,w,h);
+  var d=c.getImageData(0,0,w,h),p=d.data,hist=new Uint32Array(256),i,lo=0,hi=255,acc=0,cut=w*h*0.01;for(i=0;i<p.length;i+=4)hist[p[i+1]]++;
+  while(lo<254&&(acc+=hist[lo])<cut)lo++;acc=0;while(hi>lo+1&&(acc+=hist[hi])<cut)hi--;var k=255/(hi-lo);
+  for(i=0;i<p.length;i+=4){var v=(p[i+1]-lo)*k;v=v<0?0:v>255?255:v;p[i]=p[i+1]=p[i+2]=v}c.putImageData(d,0,0);URL.revokeObjectURL(url);res(cv)};
+ im.onerror=function(){URL.revokeObjectURL(url);rej(new Error("img"))};im.src=url})}
+// تحويل النص المقروء إلى منتجات: كل سطر فيه سعر بالدولار يُغلق منتجاً، والسطران قبله هما الاسم واللون/المقاس.
+// أول سعر في السطر هو السعر الحالي، والسعر المشطوب بعده يُتجاهل.
+function qClean(l){return l.replace(/(\dX+|\bX+)[lI!|1](?![A-Za-z])/g,"$1L").replace(/^[^A-Za-z0-9؀-ۿ]+/,"").replace(/[\s.…]+$/,"").replace(/\s+/g," ").trim()}
+// أسعار SHEIN دائماً بسنتين، والسنتات تُكتب صغيرة فوق السطر فقد تُقرأ "34 34" أو "3434" أو "2 1 .02"
+function qPrice(tok){tok=tok.replace(/\s+$/,"");var d=tok.search(/[.,:]/),L,R;
+ if(d>=0){L=tok.slice(0,d).replace(/\D/g,"");R=(tok.slice(d+1).replace(/\D/g,"")+"00").slice(0,2)}
+ else{var g=tok.trim().split(/\s+/);if(g.length>1&&/^\d{2}$/.test(g[1])){L=g[0];R=g[1]}else if(g[0].length>=3){L=g[0].slice(0,-2);R=g[0].slice(-2)}else{L=g[0];R="00"}}
+ return L?parseFloat(L+"."+R):0}
+function qParse(text){var items=[],title="",variant="",skip=/sub\s*total|total|saved|discount|coupon|shipping|tax|points|المجموع|الإجمالي|الخصم|الشحن/i,
+ noise=/lowest price|bought|add all|items shared|add to cart|checkout|similar|^\W*-?\d+\s*%|^\d{1,2}:\d{2}/i;
+ String(text).split(/\n/).forEach(function(raw){var l=raw.replace(/(\d),(\d{3})(?!\d)/g,"$1$2").trim();if(!l)return;
+  var m=l.match(/(?:US)?\$\s*([\d\s.,:]+)/);
+  if(m){if(skip.test(l)){title="";variant="";return}
+   var v=qPrice(m[1]);if(v>0&&v<5000)items.push({desc:[title,variant].filter(Boolean).join(" · "),qty:1,usd:v.toFixed(2)});
+   title="";variant="";return}
+  if(noise.test(l))return;if((l.match(/[A-Za-z؀-ۿ]/g)||[]).length<4)return;
+  var t=qClean(l);if(title&&!variant&&/\//.test(t))variant=t;else if(!title)title=t;else if(!variant)variant=t});
+ return items}
+function qOcr(input){var files=[].slice.call(input.files||[]);input.value="";if(!files.length)return;
+ var st=document.getElementById("qocr"),say=function(t,bad){if(st){st.textContent=t;st.className="qocr"+(bad?" bad":"")}},added=0,before=quote.items.length,worker=null;
+ say("جارٍ تجهيز قارئ الصور… في المرة الأولى يحتاج تحميلاً قصيراً");
+ qLib().then(function(T){return T.createWorker("eng",1,{logger:function(m){if(m.status==="recognizing text")say("جارٍ قراءة الصورة… "+Math.round(m.progress*100)+"%")}})})
+ .then(function(w){worker=w;return w.setParameters({tessedit_pageseg_mode:"4",preserve_interword_spaces:"1"})})
+ .then(function(){var chain=Promise.resolve();files.forEach(function(f,fi){chain=chain.then(function(){return qPrep(f)}).then(function(cv){if(files.length>1)say("جارٍ قراءة الصورة "+(fi+1)+" من "+files.length+"…");return worker.recognize(cv)})
+  .then(function(r){var got=qParse(r.data.text),prev=quote.items.slice(before);
+   // عند تداخل لقطتين متتاليتين لا يُكرَّر المنتج نفسه
+   got.forEach(function(it){if(fi>0&&prev.some(function(p){return p.usd===it.usd&&p.desc===it.desc}))return;quote.items.push(it);added++})})});return chain})
+ .then(function(){if(worker)worker.terminate();qRedraw();
+  say(added?"أُضيف "+added+" منتج من الصورة. راجع الأسماء والأسعار والكميات قبل الإرسال.":"لم أجد أسعاراً بالدولار في الصورة. جرّب لقطة أوضح أو أدخل الأسعار يدوياً.",!added)})
+ .catch(function(e){if(worker)worker.terminate();say(e&&e.message==="net"?"تعذّر تحميل قارئ الصور. تأكد من اتصال الإنترنت ثم حاول مجدداً.":"تعذّرت قراءة الصورة. جرّب صورة أخرى أو أدخل الأسعار يدوياً.",true)})}
