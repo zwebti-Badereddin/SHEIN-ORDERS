@@ -84,6 +84,18 @@ label{display:block;font-size:13.5px;color:var(--mut);margin:14px 0 5px}
 .qrow .qwarn{border-color:var(--warn);background:var(--warnbg);color:var(--warn);font-weight:600}
 .qshots{margin:4px 0 8px;background:none;border:0;padding:0}.qshots summary{min-height:36px;font-size:14px}.qshots img{display:block;width:100%;max-width:360px;margin:6px auto;border:1px solid var(--line);border-radius:12px}
 .bkpick{margin:0;display:flex;align-items:center;justify-content:center;flex:1}.bkrow{align-items:center}.bkrow .btn{min-height:36px;padding:4px 14px;flex:none}
+/* تذكير السداد */
+.remban{display:flex;align-items:center;gap:12px;width:100%;text-align:right;background:var(--warnbg);color:var(--ink);border:1px solid color-mix(in srgb,var(--warn) 25%,transparent);border-radius:16px;padding:12px 14px;margin:4px 0 12px;cursor:pointer;font:inherit}
+.remico{width:38px;height:38px;border-radius:11px;background:var(--card);color:var(--warn);display:grid;place-items:center;flex:none}.remtx{flex:1;min-width:0}.remtx b{display:block;font-size:14.5px}.remtx small{display:block;color:var(--mut);font-size:12.5px}.remgo{color:var(--warn);font-weight:700;font-size:14px}
+.remlist{background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden}.remrow{display:flex;gap:10px;align-items:center;padding:12px 14px;border-bottom:1px solid var(--line)}.remrow:last-child{border-bottom:0}
+.remmain{flex:1;min-width:0}.remmain b{display:block}.remmain small{display:block;color:var(--mut);font-size:12.5px}.remside{display:flex;flex-direction:column;align-items:flex-end;gap:6px}.remside .btn{min-height:38px;padding:4px 12px;font-size:13.5px}.remside .btn[disabled]{opacity:.45;cursor:not-allowed}
+/* التقارير */
+.mhero{background:var(--hero);color:var(--hero-ink);border-radius:20px;padding:16px 18px}.mhero small{display:block;opacity:.85}.mhero b{display:block;font-size:32px;line-height:1.3}.mhero em{display:block;font-style:normal;font-size:13px}.mhero .ok-t{color:#7FE3C3}.mhero .rem-t{color:#FFC48A}
+.mchart{display:flex;gap:10px;align-items:flex-end;height:170px;padding-top:6px}.mcol{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;font-size:12px;color:var(--mut)}.mcol small{font-size:11px;color:var(--ink);font-weight:600}
+.mbar{width:100%;max-width:44px;display:flex;flex-direction:column;justify-content:flex-end;border-radius:8px;overflow:hidden;background:var(--soft);height:124px}.mbar i{display:block;width:100%}
+i.mreal,.mleg i.mreal{background:var(--ok)}i.mexp,.mleg i.mexp{background:color-mix(in srgb,var(--ok) 35%,var(--card))}
+.mleg{display:flex;gap:16px;font-size:12.5px;color:var(--mut);margin-top:8px}.mleg i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-inline-end:6px;vertical-align:-1px}
+.mcard.mnow{border-color:var(--acc)}.mcard .line b{font-size:15px}
 .qimg{display:block;width:100%;border:1px solid var(--line);border-radius:12px;margin-top:6px}
 /* لكل مرحلة لون يميّزها، والتسليم والاكتمال بالأخضر */
 .s0{--st:var(--t0);--stb:var(--t0b)}.s1{--st:var(--t1);--stb:var(--t1b)}.s2{--st:var(--t2);--stb:var(--t2b)}.s3{--st:var(--t3);--stb:var(--t3b)}.s4{--st:var(--t4);--stb:var(--t4b)}.s5,.s6{--st:var(--t5);--stb:var(--t5b)}
@@ -247,13 +259,15 @@ trend:'<path d="M22 7 13.5 15.5 8.5 10.5 2 17"/><path d="M16 7h6v6"/>',
 wallet:'<path d="M20 12V8H6a2 2 0 0 1 0-4h12v4"/><path d="M4 6v12a2 2 0 0 0 2 2h14v-4"/><path d="M18 12a2 2 0 0 0 0 4h4v-4z"/>',
 pin:'<path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 1 1 16 0z"/><circle cx="12" cy="10" r="3"/>',
 dl:'<path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/>',
-x:'<path d="M18 6 6 18M6 6l12 12"/>'};
+x:'<path d="M18 6 6 18M6 6l12 12"/>',
+bell:'<path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>',
+send:'<path d="m22 2-7 20-4-9-9-4z"/><path d="M22 2 11 13"/>'};
 function ic(k){return'<svg class="ic" viewBox="0 0 24 24" aria-hidden="true">'+IC[k]+'</svg>'}
 function si(st){var i=STATUSES.indexOf(st);return i<0?0:i}
 function today(){var d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
 function get(id){return D.orders.filter(function(o){return o.id===id})[0]}
 function go(v,id){view=v;if(id!==undefined)curId=id;render();window.scrollTo(0,0)}
-function render(){var a=document.getElementById("app");a.innerHTML=view==="home"?home():view==="form"?form():view==="batches"?batchPage():view==="quote"?quotePage():detail();if(view==="form")upd()}
+function render(){var a=document.getElementById("app");a.innerHTML=view==="home"?home():view==="form"?form():view==="batches"?batchPage():view==="quote"?quotePage():view==="remind"?remindPage():view==="reports"?reportsPage():detail();if(view==="form")upd()}
 
 function home(){
  var act=0,rec=0,t=0,p=0,r=0,pf=0,pAll=0;
@@ -263,7 +277,7 @@ function home(){
  return'<div class="head"><div class="logo">'+ic("bag")+'</div><div class="ht"><b>شي إن ستور</b><small>طلبات الزبائن والدفعات</small></div><button class="out" onclick="doLogout()">خروج</button></div>'+
  '<div class="bal"><small>المتبقي عند الزبائن</small><b>'+num(r)+'<span>'+esc(D.cur)+'</span></b><div class="meter"><i style="width:'+pct+'%"></i></div><em><span>حُصّل '+pct+'%</span><span>من '+money(t)+'</span></em></div>'+
  '<div class="stats"><div class="k1"><span class="si">'+ic("bag")+'</span><span class="sv"><small>طلبات جارية</small><b>'+act+'</b></span></div><div class="k2"><span class="si">'+ic("box")+'</span><span class="sv"><small>طلبات مستلمة</small><b>'+rec+'</b></span></div><div class="k4"><span class="si">'+ic("cash")+'</span><span class="sv"><small>المقبوض</small><b>'+money(pAll)+'</b></span></div><div class="k3"><span class="si">'+ic("trend")+'</span><span class="sv"><small>الربح المتوقع</small><b class="ok-t">'+money(pf)+'</b></span></div></div>'+
- ibox()+'<div class="bar grid2" style="margin-top:16px"><button class="btn" onclick="newOrder()">طلب جديد</button><button class="btn sec" onclick="openQuote()">فاتورة مبدئية</button><button class="btn sec" onclick="go(\'batches\')">تجميع سلة</button><button class="btn sec" onclick="exportAll()">تقرير PDF</button></div>'+
+ ibox()+'<div class="bar grid2" style="margin-top:16px"><button class="btn" onclick="newOrder()">طلب جديد</button><button class="btn sec" onclick="openQuote()">فاتورة مبدئية</button><button class="btn sec" onclick="go(\'batches\')">تجميع سلة</button><button class="btn sec" onclick="go(\'reports\')">التقارير</button></div>'+remindBanner()+''+
  '<div class="row"><input id="q" placeholder="بحث بالاسم أو الهاتف" aria-label="بحث بالاسم أو الهاتف أو رقم الطلب" value="'+esc(fQ)+'" oninput="fQ=this.value;list()"><select onchange="fS=this.value;list()">'+opts+'</select></div>'+
  '<div id="list" style="margin-top:10px">'+listHtml()+'</div>'+
  '<details><summary>الإعدادات والنسخة الاحتياطية</summary>'+
@@ -363,6 +377,7 @@ function detail(){
  '<label>طريقة الدفع</label><select id="pm">'+METHODS.map(function(t){return'<option>'+t+'</option>'}).join("")+'</select>'+
  '<div class="bar" style="margin-bottom:0"><button class="btn" onclick="addPay()">+ تسجيل دفعة</button><button class="btn sec" onclick="fillRem()">سداد المتبقي</button></div></div>'+
  items+(o.notes?'<h2>ملاحظات</h2><div class="card">'+esc(o.notes)+'</div>':"")+
+ (c.rem>0.009&&o.status!=="مكتمل"?'<div class="bar"><button class="btn sec" onclick="sendRemind(\''+o.id+'\')">'+ic("bell")+' تذكير بالسداد'+(o.remindedAt?' (آخر تذكير '+ago(daysSince(o.remindedAt))+')':'')+'</button></div>':'')+
  '<div class="bar"><button class="btn" onclick="wa()">كشف حساب واتساب</button><button class="btn sec" onclick="exportOrder()">فاتورة PDF</button></div>'+
  '<div class="bar"><button class="btn sec" onclick="editOrder()">تعديل</button><button class="btn bad" onclick="delOrder()">حذف الطلب</button></div>';
 }
@@ -458,5 +473,6 @@ regSW();
 <script src="batch.js"></script>
 <script src="quote.js"></script>
 <script src="backup.js"></script>
+<script src="reports.js"></script>
 </body>
 </html>
