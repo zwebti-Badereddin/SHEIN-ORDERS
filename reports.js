@@ -23,9 +23,9 @@ function remindPage(){var L=unpaid().map(function(o){var c=calc(o),d=daysSince(l
  '<div class="card"><div class="line"><span>زبائن عليهم مبالغ</span><b>'+L.length+'</b></div><div class="line big"><span>إجمالي المتبقي</span><span class="rem-t">'+money(sum)+'</span></div></div>'+
  (L.length?'<p class="note">اضغط «تذكير» ليفتح واتساب برسالة جاهزة لكل زبون. من ذُكّر اليوم ينزل إلى آخر القائمة.</p><div class="remlist">'+rows+'</div>':'<div class="empty">لا توجد مبالغ متبقية. كل الطلبات مسددة.</div>')+
  '<details style="margin-top:18px"><summary>نص رسالة التذكير</summary><p class="note">يمكنك تعديل النص. الكلمات بين القوسين تُستبدل تلقائياً: {الاسم} {الرقم} {المتبقي} {العملة} {الحالة} {الإجمالي} {المدفوع} {المتجر}</p>'+
- '<textarea id="remtpl" style="min-height:150px;font-size:14px" oninput="D.remindTpl=this.value;save()">'+esc(remTpl())+'</textarea>'+
+ '<textarea id="remtpl" style="min-height:150px;font-size:16px" oninput="D.remindTpl=this.value;save()">'+esc(remTpl())+'</textarea>'+
  '<div class="bar"><button class="btn sec" onclick="D.remindTpl=\'\';save();render()">استعادة النص الأصلي</button></div>'+
- (L.length?'<label>معاينة لأول زبون</label><div class="card" style="white-space:pre-line;font-size:14px">'+esc(remMsg(L[0].o))+'</div>':'')+'</details>'}
+ (L.length?'<label>معاينة لأول زبون</label><div class="card" style="white-space:pre-line;font-size:16px">'+esc(remMsg(L[0].o))+'</div>':'')+'</details>'}
 
 // ---------- تقرير الربح الشهري ----------
 var MONTHS=["يناير","فبراير","مارس","أبريل","مايو","يونيو","يوليو","أغسطس","سبتمبر","أكتوبر","نوفمبر","ديسمبر"];
