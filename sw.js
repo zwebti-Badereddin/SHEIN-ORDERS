@@ -1,5 +1,5 @@
-var V="shein-v19";
-var CORE=["./","index.html","batch.js","quote.js","backup.js","reports.js","manifest.webmanifest","icon-192.png","icon-512.png","icon-maskable-512.png","apple-touch-icon.png","logo.png"];
+var V="shein-v20";
+var CORE=["./","index.html","batch.js","quote.js","backup.js","reports.js","store.js","manifest.webmanifest","icon-192.png","icon-512.png","icon-maskable-512.png","apple-touch-icon.png","logo.png"];
 var HOSTS=["www.gstatic.com","fonts.googleapis.com","fonts.gstatic.com","cdn.jsdelivr.net"];
 self.addEventListener("install",function(e){e.waitUntil(caches.open(V).then(function(c){return c.addAll(CORE)}).then(function(){return self.skipWaiting()}))});
 self.addEventListener("activate",function(e){e.waitUntil(caches.keys().then(function(ks){return Promise.all(ks.filter(function(k){return k!==V}).map(function(k){return caches.delete(k)}))}).then(function(){return self.clients.claim()}))});

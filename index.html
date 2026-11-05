@@ -320,6 +320,7 @@ function home(){
  '<label>العملة</label><input value="'+esc(D.cur)+'" onchange="D.cur=this.value;save();render()">'+
  '<label>سعر الصرف الافتراضي (دينار لكل $1)</label><input inputmode="decimal" value="'+esc(D.rate||"")+'" onchange="D.rate=this.value;save()">'+
  '<label>سعر الشحن لكل كيلو ($)</label><input inputmode="decimal" value="'+esc(has(D.kgUsd)?D.kgUsd:"5.5")+'" onchange="D.kgUsd=this.value;save()">'+
+ stHtml()+
  bkHtml()+
  '<label>متقدم: نص البيانات، تستطيع نسخه أو لصق نص سابق لاستعادته.</label>'+
  '<textarea id="bk" dir="ltr">'+esc(JSON.stringify(D))+'</textarea>'+
@@ -517,5 +518,6 @@ regSW();
 <script src="quote.js"></script>
 <script src="backup.js"></script>
 <script src="reports.js"></script>
+<script src="store.js"></script>
 </body>
 </html>
