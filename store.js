@@ -18,3 +18,20 @@ function stHtml(){if(!ST.loaded)setTimeout(stLoad,0);else setTimeout(stPaint,0);
  return'<h2 style="margin-top:14px">صفحة المتجر</h2><label for="strate">سعر الصرف في حاسبة الصفحة (دينار لكل $1)</label>'+
  '<div class="bar"><input id="strate" inputmode="decimal" dir="ltr" placeholder="7.2" style="flex:1"><button class="btn" onclick="stSave()">نشر في الصفحة</button></div>'+
  '<p class="note" id="stmsg">'+esc(stInfo())+'</p>'}
+
+// ===== عداد زوار صفحة المتجر وضغطات «أرسل الطلب» =====
+// مستند لكل يوم في stats/{YYYY-MM-DD} بتوقيت طرابلس. الزائر يُحسب مرة واحدة في اليوم لكل هاتف.
+var SS=null;
+function ssDay(off){var d=new Date(Date.now()-off*864e5);try{return d.toLocaleDateString("en-CA",{timeZone:"Africa/Tripoli"})}catch(e){return d.toISOString().slice(0,10)}}
+function ssLoad(){var el=document.getElementById("ssbox");if(!el||!auth.currentUser)return;el.innerHTML='<div class="note">جارٍ تحميل الأرقام…</div>';
+ fdb.collection("stats").where(firebase.firestore.FieldPath.documentId(),">=",ssDay(29)).get().then(function(qs){
+  var m={};qs.forEach(function(d){m[d.id]=d.data()});SS=m;ssPaint()})
+ .catch(function(){el.innerHTML='<div class="note">تعذّر تحميل الأرقام. تأكد من نشر قواعد Firestore الجديدة، ومن نشر سعر الصرف مرة واحدة على الأقل من هذا الحساب.</div>'})}
+function ssSum(days,f){var t=0;for(var i=0;i<days;i++){var x=SS[ssDay(i)];if(x)t+=n(x[f])}return t}
+function ssPaint(){var el=document.getElementById("ssbox");if(!el||!SS)return;
+ var rows=[["اليوم",1],["آخر 7 أيام",7],["آخر 30 يوماً",30]];
+ el.innerHTML='<div class="sstab"><span></span><b>زوار</b><b>ضغطوا «أرسل الطلب»</b>'+rows.map(function(r){var v=ssSum(r[1],"visits"),o=ssSum(r[1],"orders");
+  return'<span>'+r[0]+'</span><b>'+v+'</b><b>'+o+(v>0&&o>0?' <small>('+Math.round(o/v*100)+'%)</small>':'')+'</b>'}).join("")+'</div>'+
+  '<p class="note">الزائر يُحسب مرة واحدة في اليوم لكل هاتف. ضغطة «أرسل الطلب» تعني أن واتساب فُتح برسالة الطلب، وليس أن الطلب تم.</p>'}
+function ssHtml(){setTimeout(SS?ssPaint:ssLoad,0);
+ return'<h2 style="margin-top:14px">زوار صفحة المتجر</h2><div id="ssbox"></div><button class="btn sec full" onclick="ssLoad()">تحديث الأرقام</button>'}

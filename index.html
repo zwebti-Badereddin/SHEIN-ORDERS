@@ -124,6 +124,7 @@ i.mreal,.mleg i.mreal{background:var(--ok)}i.mexp,.mleg i.mexp{background:color-
 .nav button{border:0;border-radius:16px;background:none;color:#c7cdda;font:inherit;font-size:13.5px;min-height:50px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer}
 .nav button.on{background:var(--acc);color:#fff;font-weight:700}.nav .ic{width:20px;height:20px}
 .logout{margin-top:18px}
+.sstab{display:grid;grid-template-columns:1.1fr .8fr 1.3fr;gap:8px 10px;align-items:baseline;background:var(--card,#fff);border:1px solid #E8EBF1;border-radius:14px;padding:12px 14px;margin:8px 0}.sstab b{text-align:center}.sstab>b:nth-child(2),.sstab>b:nth-child(3){font-size:13px;font-weight:700;color:#5F6776}.sstab small{color:#5F6776;font-weight:500}
 .qimg{display:block;width:100%;border:1px solid var(--line);border-radius:12px;margin-top:6px}
 /* لكل مرحلة لون يميّزها، والتسليم والاكتمال بالأخضر */
 .s0{--st:var(--t0);--stb:var(--t0b)}.s1{--st:var(--t1);--stb:var(--t1b)}.s2{--st:var(--t2);--stb:var(--t2b)}.s3{--st:var(--t3);--stb:var(--t3b)}.s4{--st:var(--t4);--stb:var(--t4b)}.s5,.s6{--st:var(--t5);--stb:var(--t5b)}
@@ -320,7 +321,7 @@ function home(){
  '<label>العملة</label><input value="'+esc(D.cur)+'" onchange="D.cur=this.value;save();render()">'+
  '<label>سعر الصرف الافتراضي (دينار لكل $1)</label><input inputmode="decimal" value="'+esc(D.rate||"")+'" onchange="D.rate=this.value;save()">'+
  '<label>سعر الشحن لكل كيلو ($)</label><input inputmode="decimal" value="'+esc(has(D.kgUsd)?D.kgUsd:"5.5")+'" onchange="D.kgUsd=this.value;save()">'+
- stHtml()+
+ stHtml()+ssHtml()+
  bkHtml()+
  '<label>متقدم: نص البيانات، تستطيع نسخه أو لصق نص سابق لاستعادته.</label>'+
  '<textarea id="bk" dir="ltr">'+esc(JSON.stringify(D))+'</textarea>'+
