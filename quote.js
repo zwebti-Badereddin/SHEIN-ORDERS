@@ -148,8 +148,10 @@ function qOrig(rest){var m=rest.match(/[\$sS§£€]?\s*(\d[\d\s.,:-]*)/);if(!m)
 function qFix(v,o){if(!(v>0))return{v:v};o=o||{a:0,b:0};
  function tryB(bound){if(!bound||v<=bound*1.001)return 0;var c=v.toFixed(2),ip=c.split(".")[0],cents=c.split(".")[1],cand=[],i,j;
   // حذف رقم فقط عندما يكون الجزء الصحيح 3 أرقام فأكثر (271 ← 21)، أما 7 ← 1 فدائماً (27 ← 21)
-  for(i=0;i<ip.length;i++){if(ip.length>=3)cand.push(ip.slice(0,i)+ip.slice(i+1));if(ip[i]==="7")cand.push(ip.slice(0,i)+"1"+ip.slice(i+1))}
-  if(ip.length>=3)for(i=0;i<ip.length;i++)if(ip[i]==="7")for(j=0;j<ip.length-1;j++){var d=ip.slice(0,i)+"1"+ip.slice(i+1);cand.push(d.slice(0,j)+d.slice(j+1))}
+  // كل احتمالات استبدال 7 بـ 1، ثم حذف رقم (أو رقمين إن كان الجزء الصحيح 4 أرقام): $7171.90 ← $11.90
+  var subs=[""];for(i=0;i<ip.length;i++){var nx=[];subs.forEach(function(x){nx.push(x+ip[i]);if(ip[i]==="7")nx.push(x+"1")});subs=nx}
+  var dels=function(x){var o=[];for(var k=0;k<x.length;k++)o.push(x.slice(0,k)+x.slice(k+1));return o};
+  subs.forEach(function(x){if(x!==ip)cand.push(x);if(ip.length>=3)dels(x).forEach(function(y){cand.push(y);if(ip.length>=4)dels(y).forEach(function(z){cand.push(z)})})});
   var best=0;cand.forEach(function(x){var y=parseFloat(x+"."+cents);if(y<=bound*1.001&&y>=bound*0.25&&y>best)best=y});return best}
  var f=tryB(o.a);if(f)return{v:f,flag:"fixed"};
  if(o.a&&v>o.a*1.001)return{v:v,flag:"check"};
@@ -191,6 +193,59 @@ function qTitle(t){if(!/[\u0600-\u06FF]/.test(t))return t;var w=t.split(" "),j=f
  while(w.length>1&&j(w[0]))w.shift();while(w.length>1&&j(w[w.length-1]))w.pop();return w.join(" ").replace(/(\.{2,}|…)\s*\S{0,4}$/,"…")}
 // المقاس S يُقرأ أحياناً 5
 function qSize(t){t=t.replace(/^\d{1,2}\s+(?=[\u0600-\u06FF])/,"");return t.replace(/(^|[\s\/])5(?=\s*(?:[>\/]|$))/g,"$1S").replace(/\s*[<>]\s*$/,"").replace(/^\s*[<>]\s*/,"").trim()}
+// ===== ربط الأسماء بالمنتجات حسب المكان في الصورة =====
+// كل منتج في سلة SHEIN صف بجانبه صورته. نحدد صور المنتجات، ثم نأخذ من كل صف: الاسم (أول سطر فيه)،
+// واللون/المقاس (السطر الذي فيه /)، والسعر. أي نص خارج الصفوف (رأس الشاشة، اسم المتجر، العروض) يُتجاهل.
+// القراءة تعطي سطوراً بمواقعها: {t, y0, y1}
+function qLines(r){var d=r&&r.data||{},L=[];
+ (d.blocks||[]).forEach(function(b){(b.paragraphs||[]).forEach(function(p){(p.lines||[]).forEach(function(l){L.push(l)})})});
+ if(!L.length&&d.lines)L=d.lines;
+ return L.map(function(l){return{t:String(l.text||"").replace(/[‎‏‪-‮⁦-⁩]/g,"").replace(/\s+/g," ").trim(),y0:l.bbox.y0,y1:l.bbox.y1}})
+  .filter(function(l){return l.t}).sort(function(a,b){return a.y0-b.y0})}
+// صور المنتجات: مساحات متصلة غير بيضاء في شريط عمودي بجانب النص (يمين الصورة في العربية، يسارها في الإنجليزية)
+function qThumbs(cv){var W=cv.width,H=cv.height,c=cv.getContext("2d"),best=[];
+ [[0.62,0.95],[0.05,0.38]].forEach(function(b){var x0=Math.round(b[0]*W),x1=Math.round(b[1]*W),bw=x1-x0,d=c.getImageData(x0,0,bw,H).data,runs=[],s=-1,gap=0,y,x,cnt,step=2;
+  for(y=0;y<H;y++){cnt=0;for(x=0;x<bw;x+=step){var v=d[(y*bw+x)*4];if(v<232)cnt++}
+   var on=cnt/(bw/step)>0.35;
+   if(on){if(s<0)s=y;gap=0}else if(s>=0){gap++;if(gap>0.02*W){if(y-gap-s>0.12*W)runs.push([s,y-gap]);s=-1;gap=0}}}
+  if(s>=0&&H-s>0.12*W)runs.push([s,H]);
+  if(runs.length>best.length)best=runs});
+ return best}
+var Q_SIZE=/(?:^|[\s<>|(])((?:\d?X{0,3}[SML]|\d?XL|\d{1,2})(?:\s*-\s*\S+)*)\s*\//i;
+var Q_NOISE=/توفير|تم شراؤها|بهذا السعر|الأكثر مبيع|ترندات|آخر يوم|آخر \d|شحن|متبقي|bought|lowest|\bleft\b|almost sold|selling fast|free shipping|shipping|limited|حصري/i;
+// ينظف الاسم: علامات وأيقونات في الطرفين، وحروف لاتينية قصيرة داخل الاسم العربي (كلمة عربية قُرئت خطأً)
+function qName(t){t=qClean(t);if(!t)return"";if(qArabic(t)<=8)return t;var w=t.split(" ");
+ var junk=function(x){return/^[A-Za-z]{1,3}[”"'.]?$|^\d{1,2}$|^\d[؀-ۿ]$|^[؀-ۿ]\d$|^[^A-Za-z0-9؀-ۿ]+$/.test(x)};
+ while(w.length>1&&junk(w[0]))w.shift();while(w.length>1&&(junk(w[w.length-1])||/^[؀-ۿ]{1,2}\.?$/.test(w[w.length-1])))w.pop();
+ w=w.filter(function(x){return!/^[A-Za-z]{1,3}$/.test(x)});
+ return w.join(" ").replace(/\s*(\.{2,}|…)\s*\S{0,3}$/,"…").trim()}
+// اللون من القراءة العربية (الكلمات العربية الملاصقة لـ /)، والمقاس من القراءة الإنجليزية في نفس الارتفاع
+function qVariant(line,eLine){var seg=line.split("|").filter(function(x){return/\//.test(x)}).pop()||line,parts=seg.split("/"),col="",size="";
+ parts.forEach(function(p,i){var w=qClean(p).split(" ").filter(Boolean),ar=[];
+  if(i===0)w=w.reverse();
+  for(var k=0;k<w.length&&ar.length<3;k++){if(/[؀-ۿ]{2,}/.test(w[k])&&!/بواسطة|البيع|تم$/.test(w[k]))ar.push(w[k]);else if(ar.length)break}
+  if(i===0)ar.reverse();if(ar.length&&!col)col=ar.join(" ")});
+ var m=eLine&&eLine.match(Q_SIZE);if(m)size=m[1].toUpperCase().replace(/\s+/g,"");
+ if(!size){var o=parts.map(function(p){return qClean(p)}).filter(function(p){return p&&!/[؀-ۿ]{2,}/.test(p)});if(o.length)size=qSize(o[o.length-1].split(" ").pop())}
+ if(!col||!size)return qSize(qClean(seg));return col+" / "+size}
+function qRows(cv,E,A,rtl){var W=cv.width,TH=qThumbs(cv),pad=0.012*W;if(!TH.length)return null;
+ var NL=rtl&&A?A:E,mid=function(l){return(l.y0+l.y1)/2},inRow=function(l,r){var m=mid(l);return m>=r[0]-pad&&m<=r[1]+pad},
+  isPrice=function(l){return qParse(l.t,rtl).length>0},sameY=function(L,l){return L.filter(function(x){return Math.abs(mid(x)-mid(l))<0.02*W})[0]};
+ var prices=E.filter(isPrice),items=[],used=0,last=-1;
+ prices.forEach(function(p){var it=qParse(p.t,rtl)[0],row=TH.filter(function(r){return inRow(p,r)})[0],desc="";
+  if(row){used++;
+   var txt=NL.filter(function(l){return inRow(l,row)&&mid(l)<mid(p)-pad/2&&!isPrice(l)}),
+    vl=txt.filter(function(l){return/\//.test(l.t)})[0],
+    nl=txt.filter(function(l){return l!==vl&&!Q_NOISE.test(l.t)&&!/بواسطة|sold by/i.test(l.t)&&(l.t.match(/[A-Za-z؀-ۿ]/g)||[]).length>=4})[0],
+    name=nl?qName(nl.t):"",vv=vl?(rtl?qVariant(vl.t,(sameY(E,vl)||{}).t):qSize(qClean(vl.t))):"";
+   // اسم الماركة اللاتيني في أول الاسم العربي تقرؤه القراءة الإنجليزية أفضل
+   if(rtl&&nl&&name){var el=sameY(E,nl);if(el){var br=el.t.split(" ").filter(Boolean).pop();br=/^[A-Z][A-Za-z]{3,}$/.test(br||"")?br:"";if(br&&name.indexOf(br)<0&&qArabic(name)>8)name=br+" "+name}}
+   desc=[name||("منتج "+(items.length+1)),vv].filter(Boolean).join(" · ")}
+  else{// منتج بلا صورة كاملة (مقطوع في أعلى اللقطة): الطريقة السابقة على السطور بينه وبين المنتج قبله
+   var seg=NL.filter(function(l){return mid(l)>last&&mid(l)<mid(p)-pad/2&&!isPrice(l)}).map(function(l){return l.t}).join("\n");
+   var old=qParse(seg+"\n"+p.t,rtl).pop(),dp=old&&old.desc?old.desc.split(" · "):[];if(dp.length)dp[0]=qName(dp[0])||dp[0];desc=dp.join(" · ")}
+  last=mid(p);it.desc=desc;items.push(it)});
+ return used?items:null}
 var qShots=[];
 function qShotsHtml(){return qShots.length?'<details class="qshots" open><summary>الصورة المرفقة للمقارنة</summary>'+qShots.map(function(u){return'<img src="'+u+'" alt="صورة السلة">'}).join("")+'</details>':""}
 function qOcr(input){var files=[].slice.call(input.files||[]);input.value="";if(!files.length)return;
@@ -201,10 +256,12 @@ function qOcr(input){var files=[].slice.call(input.files||[]);input.value="";if(
  .then(function(w){worker=w;return w.setParameters({tessedit_pageseg_mode:"4",preserve_interword_spaces:"1"})})
  .then(function(){var chain=Promise.resolve();files.forEach(function(f,fi){chain=chain.then(function(){return qPrep(f)}).then(function(cv){if(files.length>1)say("جارٍ قراءة الصورة "+(fi+1)+" من "+files.length+"…");
    // القراءة الأولى بالإنجليزية. إن ظهر أن السلة بالواجهة العربية تُعاد القراءة بالعربية والإنجليزية معاً
-   return worker.recognize(cv).then(function(r){var t1=r.data.text;if(!qIsRtl(t1))return qParse(t1);
+   // الأسماء تُربط بالمنتجات حسب مكانها في الصورة (qRows)، وإن لم تُكتشف صور المنتجات نعود للطريقة السابقة
+   return worker.recognize(cv,{},{blocks:true,text:true}).then(function(r){var t1=r.data.text,E=qLines(r);
+    if(!qIsRtl(t1)){var g=null;try{g=qRows(cv,E,null,false)}catch(e){}return g&&g.length?g:qParse(t1)}
     say("السلة بالعربية، جارٍ قراءة الأسماء العربية…");
     return (worker.__ara?Promise.resolve():worker.reinitialize(["ara","eng"]).then(function(){worker.__ara=1;return worker.setParameters({tessedit_pageseg_mode:"4",preserve_interword_spaces:"1"})}))
-     .then(function(){return worker.recognize(cv)}).then(function(r2){return qMerge(t1,r2.data.text)})})})
+     .then(function(){return worker.recognize(cv,{},{blocks:true,text:true})}).then(function(r2){var g=null;try{g=qRows(cv,E,qLines(r2),true)}catch(e){}return g&&g.length?g:qMerge(t1,r2.data.text)})})})
   .then(function(got){var prev=quote.items.slice(before);
    // عند تداخل لقطتين متتاليتين لا يُكرَّر المنتج نفسه
    got.forEach(function(it){if(fi>0&&prev.some(function(p){return p.usd===it.usd&&p.desc===it.desc}))return;quote.items.push(it);added++})})});return chain})
