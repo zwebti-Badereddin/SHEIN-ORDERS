@@ -6,6 +6,17 @@ service cloud.firestore {
     match /users/{userId}/{document=**} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
     }
+    // سعر الصرف المعروض في صفحة المتجر: يقرؤه الجميع، ويكتبه صاحب الحساب الذي أنشأه فقط
+    match /public/store {
+      allow read: if true;
+      allow create: if request.auth != null
+        && request.resource.data.owner == request.auth.uid
+        && request.resource.data.rate is number && request.resource.data.rate > 0 && request.resource.data.rate < 100;
+      allow update: if request.auth != null
+        && resource.data.owner == request.auth.uid
+        && request.resource.data.owner == request.auth.uid
+        && request.resource.data.rate is number && request.resource.data.rate > 0 && request.resource.data.rate < 100;
+    }
     match /{document=**} {
       allow read, write: if false;
     }
