@@ -1,0 +1,8 @@
+wrangler.jsonc
+worker.js
+.assetsignore
+netlify.toml
+netlify
+functions
+node_modules
+.wrangler
