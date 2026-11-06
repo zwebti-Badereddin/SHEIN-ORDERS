@@ -61,28 +61,60 @@ function cartLanding(html, fromUrl) {
   return { info: { id: info.id, localcountry: lc, url_from: info.url_from, cart_share: info.cart_share }, sites: sites.slice(0, 30), urls: bases.map((b) => b.replace(/\/$/, "") + qs) };
 }
 
-// طلب منتجات السلة المشتركة كما تفعل صفحة SHEIN: /bff-api/order/cart/share/landing
-async function bffLanding(landingUrl, info, jar, attempts) {
+// طلب منتجات السلة المشتركة كما تفعل صفحة SHEIN: POST {langPath}/bff-api/order/cart/share/landing
+// مع AppCurrency وAppLanguage وx-csrf-token. نجرب عدة أشكال لأسماء الحقول حتى يرد بمنتجات.
+async function bffLanding(landingUrl, info, jar, attempts, pageHtml) {
   const u = new URL(landingUrl), lang = (u.pathname.match(/^\/([a-z]{2}(?:-[a-z]{2})?)\//i) || [])[1] || "";
-  const bases = [...new Set([u.origin + (lang ? "/" + lang : "") + "/bff-api", u.origin + "/bff-api"])];
-  const qs = new URLSearchParams({ group_id: info.id, local_country: info.localcountry || "", url_from: info.url_from || "" });
-  if (info.cart_share) qs.set("cart_share", String(info.cart_share));
-  const headers = { "user-agent": UA, "accept": "application/json, text/plain, */*", "accept-language": "ar,en;q=0.8", "x-requested-with": "XMLHttpRequest",
-    "referer": landingUrl, "origin": u.origin, "localcountry": info.localcountry || "", ...(Object.keys(jar).length ? { cookie: jarHeader(jar) } : {}) };
-  for (const base of bases) {
-    for (const method of ["GET", "POST"]) {
-      const url = base + "/order/cart/share/landing" + (method === "GET" ? "?" + qs : "");
+  const base = u.origin + (lang ? "/" + lang : "") + "/bff-api";
+  const csrf = (pageHtml.match(/csrf_token["']?\s*[:=]\s*["']([^"']+)["']/) || [])[1] || "";
+  const appLang = (pageHtml.match(/appLanguage["']?\s*[:=]\s*["']([^"']+)["']/) || [])[1] || lang || "en";
+  const headers = { "user-agent": UA, "accept": "application/json, text/plain, */*", "x-requested-with": "XMLHttpRequest", "referer": landingUrl, "origin": u.origin,
+    "AppCurrency": "USD", "AppLanguage": appLang, ...(csrf ? { "x-csrf-token": csrf } : {}), ...(Object.keys(jar).length ? { cookie: jarHeader(jar) } : {}) };
+  const id = String(info.id), lc = info.localcountry || "", uf = info.url_from || "";
+  const variants = [
+    { group_id: id, local_country: lc },
+    { group_id: id, local_country: lc, url_from: uf, cart_share: String(info.cart_share || 1) },
+    { groupId: id, localCountry: lc },
+    { group_id: id, localcountry: lc },
+    { share_id: id, local_country: lc },
+    { group_id: id }
+  ];
+  for (const v of variants) {
+    for (const enc of ["json", "form"]) {
+      const body = enc === "json" ? JSON.stringify(v) : new URLSearchParams(v).toString();
+      const url = base + "/order/cart/share/landing?_ver=1.1.8&_lang=" + encodeURIComponent(appLang);
       try {
-        const res = await fetch(url, method === "GET" ? { headers } : { method, headers: { ...headers, "content-type": "application/json" }, body: JSON.stringify(Object.fromEntries(qs)) });
+        const res = await fetch(url, { method: "POST", headers: { ...headers, "content-type": enc === "json" ? "application/json" : "application/x-www-form-urlencoded" }, body });
         jarStore(jar, res);
         const text = await res.text();
-        const items = extract(text);
-        attempts.push({ url, method, status: res.status, length: text.length, items: items.length, head: text.slice(0, 1500) });
+        const items = extract(text).length ? extract(text) : walkItems(text);
+        attempts.push({ enc, body: v, status: res.status, length: text.length, items: items.length, head: text.slice(0, items.length ? 600 : 2500) });
         if (items.length) return items;
-      } catch (e) { attempts.push({ url, method, error: e.message }); }
+        if (text.length > 200) return items; // رد فيه بيانات لكن لم نتعرف على شكلها: نتوقف لنراه
+      } catch (e) { attempts.push({ enc, body: v, error: e.message }); }
     }
   }
   return [];
+}
+
+// قراءة عامة لأي رد JSON: كل كائن فيه اسم منتج وسعر
+function walkItems(text) {
+  let j; try { j = JSON.parse(text); } catch { return []; }
+  const out = [], seen = new Set();
+  const price = (o) => { for (const k of ["salePrice", "sale_price", "unitPrice", "price", "priceInfo"]) { const v = o[k]; if (v == null) continue; if (typeof v === "object") { const n = num(v.usdAmount ?? v.amount ?? v.price ?? (v.salePrice && (v.salePrice.usdAmount ?? v.salePrice.amount))); if (n) return n; } else if (num(v)) return num(v); } return 0; };
+  const walk = (o, d) => {
+    if (!o || typeof o !== "object" || d > 12) return;
+    if (Array.isArray(o)) { o.forEach((x) => walk(x, d + 1)); return; }
+    const name = o.goods_name || o.goodsName || o.productName || o.product_name;
+    const p = name ? price(o) : 0;
+    if (name && p) {
+      const it = { name, sku: o.goods_sn || o.goodsSn || o.sku_code || "", price: p, orig: num((o.retailPrice && (o.retailPrice.usdAmount ?? o.retailPrice.amount)) || o.retail_price), qty: Math.max(1, num(o.quantity) || 1),
+        attr: o.attr_value_en || o.attr_value || o.goods_attr || "", img: o.goods_img || o.goodsImg || "" };
+      const key = it.sku + "|" + it.attr + "|" + it.price; if (!seen.has(key)) { seen.add(key); out.push(it); }
+    }
+    Object.values(o).forEach((x) => walk(x, d + 1));
+  };
+  walk(j, 0); return out;
 }
 
 // الكائن الذي يحتوي الموضع i: نرجع حتى «{» التي تفتحه، ثم نتقدم حتى «}» التي تغلقه
@@ -134,11 +166,11 @@ async function apiContext(html) {
     try {
       const t = await (await fetch(u, { headers: { "user-agent": UA }, signal: ctl.signal })).text();
       const name = u.split("/").pop(), hits = [];
-      for (const w of ["/order/cart/share/landing", "useBffApi:", "bff-api"]) {
+      for (const w of ["fetchCartShareLanding(", "fetchCartShareLanding)", ".fetchCartShareLanding"]) {
         let i = -1, n = 0;
-        while (n < (w === "/order/cart/share/landing" ? 3 : 1) && (i = t.indexOf(w, i + 1)) >= 0) { hits.push({ w, s: t.slice(Math.max(0, i - 900), i + 700) }); n++; }
+        while (n < 2 && (i = t.indexOf(w, i + 1)) >= 0) { hits.push({ w, s: t.slice(Math.max(0, i - 1200), i + 600) }); n++; }
       }
-      if (hits.some((h) => h.w === "/order/cart/share/landing") || /schttp/.test(name)) out[name] = hits.slice(0, 4);
+      if (hits.length) out[name] = hits.slice(0, 3);
     } catch {}
   }));
   clearTimeout(timer);
@@ -247,7 +279,7 @@ export default async (req) => {
         // نفتح صفحة السلة أولاً لنأخذ كوكيز الموقع، ثم نطلب المنتجات من نفس الطلب الذي تستخدمه الصفحة
         firstLanding = await fetchFollow(landing.urls[0], trail, jar);
         items = extract(firstLanding.body);
-        if (!items.length) items = await bffLanding(landing.urls[0], landing.info, jar, bffAttempts);
+        if (!items.length) items = await bffLanding(landing.urls[0], landing.info, jar, bffAttempts, firstLanding.body);
         r = firstLanding;
       }
     }
@@ -256,6 +288,7 @@ export default async (req) => {
     const out = { ok: items.length > 0, count: items.length, total: Math.round(items.reduce((s, x) => s + x.price * x.qty, 0) * 100) / 100, items, finalUrl: r.finalUrl };
     if (!items.length) { out.error = "no_items"; out.message = "لم نتمكن من قراءة منتجات السلة من هذا الرابط"; }
     if (debug) {
+      out.csrfInPage = firstLanding ? /csrf_token/.test(firstLanding.body) : null;
       out.trail = trail; out.landing = landing && landing.info; out.bffAttempts = bffAttempts; out.cookies = Object.keys(jar);
       if (!items.length && firstLanding) out.apiContext = await apiContext(firstLanding.body);
     }
