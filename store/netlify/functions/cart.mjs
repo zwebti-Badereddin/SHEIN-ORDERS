@@ -21,6 +21,9 @@ async function fetchFollow(start, trail) {
     // صفحات القفز (sharejump) تحمل الرابط الحقيقي في معامل أو داخل الصفحة
     const inner = new URL(url).searchParams.get("link") || new URL(url).searchParams.get("url");
     if (inner && /^https?:/i.test(inner) && i < 7 && !/goods_name/.test(body)) { url = inner; continue; }
+    // صفحة onelink تضع الرابط التالي في <input id="url" value="..."> ثم تنتقل إليه بالجافاسكربت
+    const iv = body.match(/<input[^>]*id=["']url["'][^>]*value=["']([^"']+)["']/i) || body.match(/<input[^>]*value=["']([^"']+)["'][^>]*id=["']url["']/i);
+    if (iv && !/goods_name/.test(body) && i < 7) { url = iv[1].replace(/&amp;/g, "&"); continue; }
     const m = body.match(/(?:location\.(?:href|replace)\s*\(?\s*=?\s*|http-equiv=["']refresh["'][^>]*url=)["']?(https?:\/\/[^"'\s<>)]+)/i);
     if (m && !/goods_name/.test(body) && i < 7) { url = m[1].replace(/\\u002F/g, "/").replace(/\\\//g, "/"); continue; }
     break;
@@ -79,7 +82,10 @@ function debugInfo(html) {
     counts: Object.fromEntries(["goods_name", "goods_sn", "salePrice", "retailPrice", "shareInfo", "cartShare", "__NEXT_DATA__", "gbRawData", "captcha", "risk"].map((w) => [w, html.split(w).length - 1])),
     apiUrls: [...new Set((html.match(/["'](\/?(?:api|bff-api|h5)\/[^"'\s]{3,120})["']/g) || []).map((s) => s.slice(1, -1)))].slice(0, 40),
     goodsSnippets: around('"goods_name"'),
-    head: html.slice(0, 3000)
+    globals: [...new Set((html.match(/window\.[A-Za-z_$][\w$]*\s*=/g) || []).map((x) => x.replace(/\s*=$/, "")))].slice(0, 40),
+    scripts: (html.match(/<script[^>]+src=["'][^"']+["']/gi) || []).map((x) => x.replace(/^.*src=["']/i, "").replace(/["']$/, "")).slice(0, 20),
+    head: html.slice(0, 2500),
+    tail: html.length > 2500 ? html.slice(-2500) : ""
   };
 }
 
