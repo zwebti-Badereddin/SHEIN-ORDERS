@@ -157,7 +157,8 @@ function extract(html) {
       price: num(sale),
       orig: num(pick(win, /"retailPrice"\s*:\s*\{[^}]*?"usdAmount"\s*:\s*"?([\d.]+)/) || pick(win, /"retailPrice"\s*:\s*\{[^}]*?"amount"\s*:\s*"?([\d.]+)/)),
       qty: Math.max(1, num(pick(win, /"quantity"\s*:\s*"?(\d+)/)) || 1),
-      attr: unesc(pick(win, /"attr_value_en"\s*:\s*"((?:[^"\\]|\\.)*)"/) || pick(win, /"attr_value"\s*:\s*"((?:[^"\\]|\\.)*)"/)),
+      // اللون/المقاس: في رد مشاركة السلة اسم الحقل goodsAttr، مثل "متعدد الألوان / أسود"
+      attr: unesc(pick(win, /"goodsAttr"\s*:\s*"((?:[^"\\]|\\.)*)"/) || pick(win, /"attr_value_en"\s*:\s*"((?:[^"\\]|\\.)*)"/) || pick(win, /"attr_value"\s*:\s*"((?:[^"\\]|\\.)*)"/)),
       img: unesc(pick(win, /"goods_img"\s*:\s*"((?:[^"\\]|\\.)*)"/)),
       currency: pick(win, /"amountWithSymbol"\s*:\s*"([^"\d\s.,]+)/)
     };
