@@ -9,12 +9,20 @@ const json = (obj, status = 200) => new Response(JSON.stringify(obj), {
 });
 
 // يتبع التحويلات يدوياً ليسجل كل خطوة، ويفك الروابط المضمَّنة (link= / url=) في روابط المشاركة
-async function fetchFollow(start, trail) {
+// الكوكيز التي يضعها SHEIN تُرسل مع الطلبات التالية في نفس العملية
+function jarHeader(jar) { return Object.entries(jar).map(([k, v]) => k + "=" + v).join("; "); }
+function jarStore(jar, res) {
+  const list = typeof res.headers.getSetCookie === "function" ? res.headers.getSetCookie() : (res.headers.get("set-cookie") ? [res.headers.get("set-cookie")] : []);
+  for (const c of list) { const m = c.match(/^\s*([^=;\s]+)=([^;]*)/); if (m) jar[m[1]] = m[2]; }
+}
+
+async function fetchFollow(start, trail, jar = {}) {
   let url = start, res, body = "";
   for (let i = 0; i < 8; i++) {
     const host = new URL(url).hostname;
     if (!OK_HOST.test(host)) { trail.push({ url, stop: "host not allowed" }); break; }
-    res = await fetch(url, { redirect: "manual", headers: { "user-agent": UA, "accept": "text/html,application/json;q=0.9,*/*;q=0.8", "accept-language": "en-US,en;q=0.9" } });
+    res = await fetch(url, { redirect: "manual", headers: { "user-agent": UA, "accept": "text/html,application/json;q=0.9,*/*;q=0.8", "accept-language": "en-US,en;q=0.9", ...(Object.keys(jar).length ? { cookie: jarHeader(jar) } : {}) } });
+    jarStore(jar, res);
     trail.push({ url, status: res.status });
     const loc = res.headers.get("location");
     if (res.status >= 300 && res.status < 400 && loc) { url = new URL(loc, url).href; continue; }
@@ -51,6 +59,30 @@ function cartLanding(html, fromUrl) {
   const qs = `/cart/share/landing?shc=${encodeURIComponent(shc)}&group_id=${encodeURIComponent(info.id)}&local_country=${encodeURIComponent(lc)}&url_from=${encodeURIComponent(info.url_from || "")}${info.cart_share ? "&cart_share=" + info.cart_share : ""}`;
   const bases = [...new Set([hit && "https://" + hit.site.replace(/^https?:\/\//, ""), "https://m.shein.com/ar", "https://m.shein.com"].filter(Boolean))];
   return { info: { id: info.id, localcountry: lc, url_from: info.url_from, cart_share: info.cart_share }, sites: sites.slice(0, 30), urls: bases.map((b) => b.replace(/\/$/, "") + qs) };
+}
+
+// طلب منتجات السلة المشتركة كما تفعل صفحة SHEIN: /bff-api/order/cart/share/landing
+async function bffLanding(landingUrl, info, jar, attempts) {
+  const u = new URL(landingUrl), lang = (u.pathname.match(/^\/([a-z]{2}(?:-[a-z]{2})?)\//i) || [])[1] || "";
+  const bases = [...new Set([u.origin + (lang ? "/" + lang : "") + "/bff-api", u.origin + "/bff-api"])];
+  const qs = new URLSearchParams({ group_id: info.id, local_country: info.localcountry || "", url_from: info.url_from || "" });
+  if (info.cart_share) qs.set("cart_share", String(info.cart_share));
+  const headers = { "user-agent": UA, "accept": "application/json, text/plain, */*", "accept-language": "ar,en;q=0.8", "x-requested-with": "XMLHttpRequest",
+    "referer": landingUrl, "origin": u.origin, "localcountry": info.localcountry || "", ...(Object.keys(jar).length ? { cookie: jarHeader(jar) } : {}) };
+  for (const base of bases) {
+    for (const method of ["GET", "POST"]) {
+      const url = base + "/order/cart/share/landing" + (method === "GET" ? "?" + qs : "");
+      try {
+        const res = await fetch(url, method === "GET" ? { headers } : { method, headers: { ...headers, "content-type": "application/json" }, body: JSON.stringify(Object.fromEntries(qs)) });
+        jarStore(jar, res);
+        const text = await res.text();
+        const items = extract(text);
+        attempts.push({ url, method, status: res.status, length: text.length, items: items.length, head: text.slice(0, 1500) });
+        if (items.length) return items;
+      } catch (e) { attempts.push({ url, method, error: e.message }); }
+    }
+  }
+  return [];
 }
 
 // الكائن الذي يحتوي الموضع i: نرجع حتى «{» التي تفتحه، ثم نتقدم حتى «}» التي تغلقه
@@ -93,6 +125,26 @@ function extract(html) {
 }
 
 // يبحث في صفحة السلة وملفات الجافاسكربت التابعة لها عن مسارات الطلبات التي تخص مشاركة السلة
+async function apiContext(html) {
+  const uniq = (a) => [...new Set(a)];
+  const allJs = uniq((html.match(/(?:https?:)?\/\/[a-z0-9.-]*ltwebstatic\.com\/[^"'\s<>]+?\.js/gi) || []).map((u) => (u.startsWith("//") ? "https:" + u : u)));
+  const out = {};
+  const ctl = new AbortController(); const timer = setTimeout(() => ctl.abort(), 6000);
+  await Promise.all(allJs.slice(0, 90).map(async (u) => {
+    try {
+      const t = await (await fetch(u, { headers: { "user-agent": UA }, signal: ctl.signal })).text();
+      const name = u.split("/").pop(), hits = [];
+      for (const w of ["/order/cart/share/landing", "useBffApi:", "bff-api"]) {
+        let i = -1, n = 0;
+        while (n < (w === "/order/cart/share/landing" ? 3 : 1) && (i = t.indexOf(w, i + 1)) >= 0) { hits.push({ w, s: t.slice(Math.max(0, i - 900), i + 700) }); n++; }
+      }
+      if (hits.some((h) => h.w === "/order/cart/share/landing") || /schttp/.test(name)) out[name] = hits.slice(0, 4);
+    } catch {}
+  }));
+  clearTimeout(timer);
+  return out;
+}
+
 async function discover(html) {
   const uniq = (a) => [...new Set(a)];
   const shareStrings = uniq((html.match(/["'`][^"'`\s<>]{0,120}(?:share|landing)[^"'`\s<>]{0,120}["'`]/gi) || []).map((x) => x.slice(1, -1))).slice(0, 80);
@@ -186,23 +238,27 @@ export default async (req) => {
   if (!OK_HOST.test(host)) return json({ ok: false, error: "not_shein", message: "هذا ليس رابط سلة من SHEIN" }, 400);
   const trail = [];
   try {
-    let r = await fetchFollow(link, trail);
+    const jar = {}, bffAttempts = [];
+    let r = await fetchFollow(link, trail, jar);
     let items = extract(r.body), landing = null, firstLanding = null;
     if (!items.length) {
       landing = cartLanding(r.body, r.finalUrl);
-      for (const u of (landing ? landing.urls : [])) {
-        const r2 = await fetchFollow(u, trail);
-        if (!firstLanding) firstLanding = r2;
-        const it2 = extract(r2.body);
-        r = r2; items = it2;
-        if (it2.length) break;
+      if (landing) {
+        // نفتح صفحة السلة أولاً لنأخذ كوكيز الموقع، ثم نطلب المنتجات من نفس الطلب الذي تستخدمه الصفحة
+        firstLanding = await fetchFollow(landing.urls[0], trail, jar);
+        items = extract(firstLanding.body);
+        if (!items.length) items = await bffLanding(landing.urls[0], landing.info, jar, bffAttempts);
+        r = firstLanding;
       }
     }
     // صفحة السلة تطبيق جافاسكربت يجلب المنتجات بطلب منفصل؛ في وضع التشخيص نبحث عن اسم هذا الطلب في ملفات الصفحة
     if (!items.length && debug && firstLanding) { r = firstLanding; }
     const out = { ok: items.length > 0, count: items.length, total: Math.round(items.reduce((s, x) => s + x.price * x.qty, 0) * 100) / 100, items, finalUrl: r.finalUrl };
     if (!items.length) { out.error = "no_items"; out.message = "لم نتمكن من قراءة منتجات السلة من هذا الرابط"; }
-    if (debug) { out.trail = trail; out.landing = landing; out.debug = debugInfo(r.body); if (!items.length && firstLanding) out.discover = await discover(firstLanding.body); }
+    if (debug) {
+      out.trail = trail; out.landing = landing && landing.info; out.bffAttempts = bffAttempts; out.cookies = Object.keys(jar);
+      if (!items.length && firstLanding) out.apiContext = await apiContext(firstLanding.body);
+    }
     return json(out);
   } catch (e) {
     return json({ ok: false, error: "fetch_failed", message: "تعذّر الوصول إلى SHEIN", detail: String(e && e.message || e), trail }, 502);
