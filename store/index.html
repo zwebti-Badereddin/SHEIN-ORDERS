@@ -1,0 +1,373 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>شي إن ستور: اطلب من SHEIN بسهولة</title>
+<meta name="description" content="نطلب لك من SHEIN ونوصّله لباب بيتك. حاسبة السلة، خطوات الطلب بالصور، والتوصيل إلى جميع مدن ليبيا.">
+<meta name="theme-color" content="#0E7C86">
+<link rel="canonical" href="https://sheinstore-ly.netlify.app/">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="ar_LY">
+<meta property="og:site_name" content="شي إن ستور">
+<meta property="og:title" content="شي إن ستور: اطلب من SHEIN بسهولة">
+<meta property="og:description" content="حاسبة السلة، خطوات الطلب بالصور، والتوصيل إلى جميع مدن ليبيا.">
+<meta property="og:url" content="https://sheinstore-ly.netlify.app/">
+<meta property="og:image" content="https://sheinstore-ly.netlify.app/img/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="icon-192.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="شي إن ستور">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="preload" as="image" href="img/logo.webp">
+<style>
+:root{--ac:#0E7C86;--ac-d:#0A4C52;--ac-l:#DDF1F2;--ink:#1C2230;--mute:#5F6776;--line:#E8EBF1}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{margin:0;background:#fff;color:var(--ink);font-family:'Tajawal',Tahoma,sans-serif;font-size:17px;line-height:1.6}
+a{color:var(--ac)}
+input,textarea,button{font:inherit;color:inherit}
+input:focus,textarea:focus{outline:none;border-color:var(--ac)!important;box-shadow:0 0 0 3px var(--ac-l)}
+button:focus-visible,a:focus-visible,summary:focus-visible{outline:3px solid #F2A65A;outline-offset:2px}
+img{max-width:100%}
+h1,h2{margin:0;font-weight:800}
+h2{font-size:21px}
+.wrap{max-width:520px;margin:0 auto;padding:14px 18px 0;display:flex;flex-direction:column;gap:22px}
+section{scroll-margin-top:12px}
+.btn{min-height:50px;border-radius:14px;border:0;text-decoration:none;font-weight:700;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer}
+.btn-ac{background:var(--ac);color:#fff}
+.btn-ac:hover{background:#0A5F67;color:#fff}
+.mute{color:var(--mute)}
+.card{border:1px solid var(--line);border-radius:22px;padding:16px}
+.hdr{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.hero{background:var(--ac-l);border-radius:26px;padding:24px 20px;display:flex;flex-direction:column;gap:12px}
+.hero h1{font-size:30px;line-height:1.3;color:var(--ac-d)}
+.hero p{margin:0;color:#2B5C60}
+.row2{display:flex;gap:8px;flex-wrap:wrap}.row2>*{flex:1 1 140px}
+.offer{border-radius:22px;overflow:hidden;border:1px solid var(--line)}
+.offer img{display:block;width:100%;height:auto;aspect-ratio:2/3;object-fit:cover;background:#F3F5F8}
+.osb{display:flex;flex-direction:column;gap:8px;border-radius:16px;padding:12px;background:#F6F7F9}
+.osb.mine{background:var(--ac-l);box-shadow:inset 0 0 0 1px #BFE3E0}
+.ost{font-size:16px}
+.ob{min-height:52px;border-radius:14px;background:var(--ink);color:#fff;text-decoration:none;display:flex;align-items:center;justify-content:center;gap:8px;font-size:15px;font-weight:700;padding:0 12px;text-align:center}
+.ob:hover{color:#fff}
+.osb.mine .ob{background:var(--ac)}
+.ob.alt,.osb.mine .ob.alt{background:#fff;color:var(--ink);border:1px solid #D5DAE2}
+.ob svg{flex:none}
+.apkm{background:#fff;border:1px solid #CFE7E4;border-radius:14px;padding:10px 14px}
+.apkm summary{font-size:15px;color:var(--ac-d)}
+.apkm ol{margin:0;padding-inline-start:20px;display:flex;flex-direction:column;gap:8px;font-size:14px;color:#2B3444}
+.apkm-b{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+.apkm-b a{flex:1 1 120px;min-height:42px;border-radius:12px;background:var(--ink);color:#fff;text-decoration:none;font-weight:700;font-size:14px;display:flex;align-items:center;justify-content:center;padding:0 10px}
+.apkm-b a+a{background:#fff;color:var(--ink);border:1px solid #D5DAE2}
+.wahelp{min-height:46px;border-radius:14px;border:1px dashed #9CCFC9;background:#fff;color:#0B5A3D;text-decoration:none;display:flex;align-items:center;justify-content:center;gap:8px;font-size:14px;font-weight:700;padding:6px 12px;text-align:center}
+.wahelp svg{flex:none}
+.vid{display:flex;flex-direction:column;gap:10px}
+.vid video{display:block;width:100%;max-width:280px;height:auto;aspect-ratio:9/16;margin:0 auto;border-radius:20px;background:#DDF1F2;border:1px solid var(--line)}
+.strip{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:6px;margin:0 -18px;padding-inline:18px;scrollbar-width:thin}
+.strip button{flex:none;padding:0;border:0;background:none;scroll-snap-align:center;cursor:zoom-in;border-radius:18px}
+.strip img{width:240px;height:auto;aspect-ratio:1080/2211;border-radius:18px;border:1px solid var(--line);display:block;background:#F3F5F8}
+.calc{background:#FDE7D6;border-radius:26px;padding:20px;display:flex;flex-direction:column;gap:12px;color:#7A3410}
+.calc h2{color:#6E2E0D}
+.prow{display:flex;align-items:center;gap:8px}
+.pnum{flex:none;width:34px;height:34px;border-radius:50%;background:#fff;color:#8A3F05;font-weight:800;font-size:15px;display:grid;place-items:center}
+.pin{flex:1;min-width:0;position:relative}
+.pin input{width:100%;min-height:52px;border-radius:14px;border:1px solid #F1C6A6;background:#fff;padding:0 44px 0 16px;font-size:20px;font-weight:700;color:var(--ink);text-align:left}
+.pin span{position:absolute;right:14px;top:50%;transform:translateY(-50%);color:#B0784F;font-weight:700}
+.pdel,.padd{flex:none;width:44px;height:44px;border-radius:12px;display:grid;place-items:center}
+.pdel{border:1px solid #F1C6A6;background:#FFF7F1;color:#8A3F05;font-size:22px;cursor:pointer}
+.padd{border:1px dashed #E2A77D;color:#C0703A;font-size:24px}
+.res{background:rgba(255,255,255,.75);border-radius:18px;padding:14px 16px;display:flex;flex-direction:column;gap:8px}
+.res .l{display:flex;justify-content:space-between;gap:10px;font-size:15px}
+.res .big{border-top:1px solid #F1C6A6;padding-top:8px;align-items:baseline;color:#6E2E0D}
+.res .big b{font-size:28px;font-weight:800}
+.dl{background:#DDF3E9;border-radius:26px;padding:20px;display:flex;flex-direction:column;gap:10px}
+.dl h2{color:#0B4A33;margin-bottom:2px}
+.dl .it{background:#fff;border-radius:18px;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;gap:12px}
+.dl .it div{display:flex;flex-direction:column;gap:2px;min-width:0}
+.dl .it span{font-size:14px;color:#4B5468}
+.dl .it>b{font-size:20px;color:#0B5A3D;white-space:nowrap}
+.form{display:flex;flex-direction:column;gap:10px}
+.form label{font-size:15px;color:#4B5468}
+.form input,.form textarea{width:100%;min-height:50px;border-radius:14px;border:1px solid #E2E6EC;padding:0 14px;font-size:17px;background:#fff}
+.form textarea{min-height:96px;padding:12px 14px 52px;font-size:16px;resize:vertical}
+.paste{position:absolute;left:8px;bottom:10px;min-height:40px;padding:0 16px;border-radius:12px;border:1px solid #BFE3E0;background:var(--ac-l);color:var(--ac-d);font-size:15px;font-weight:700;display:flex;align-items:center;gap:6px;cursor:pointer}
+.msg{border-radius:14px;padding:10px 14px;font-size:15px;white-space:pre-line}
+.msg.err{background:#FDF1E4;color:#8A3F05;font-weight:500}
+.msg.ok{background:#DDF3E9;color:#0B4A33}
+details{border:1px solid var(--line);border-radius:16px;padding:12px 16px}
+summary{font-weight:700;cursor:pointer}
+details p{margin:8px 0 0;color:#4B5468}
+footer{border-top:1px solid var(--line);padding-top:18px;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center}
+.share{margin-top:6px;min-height:46px;padding:0 18px;border-radius:14px;border:1px solid #E2E6EC;background:#fff;font-size:15px;font-weight:700;display:flex;align-items:center;gap:8px;cursor:pointer}
+.dock{position:sticky;bottom:calc(12px + env(safe-area-inset-bottom));z-index:20;display:flex;gap:8px;background:rgba(255,255,255,.94);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border:1px solid var(--line);border-radius:20px;padding:8px;box-shadow:0 8px 24px rgba(28,34,48,.14);margin:6px 0 12px}
+.dock .wa{flex:1;min-height:50px;font-size:16px;font-weight:800}
+.dock .tel{width:54px;min-height:50px;border-radius:14px;border:1px solid #CFE7E4;background:var(--ac-l);color:var(--ac-d);display:grid;place-items:center}
+.zoom{position:fixed;inset:0;z-index:50;background:rgba(12,16,24,.94);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:16px}
+.zoom[hidden]{display:none}
+.zoom img{max-width:100%;max-height:calc(100vh - 110px);max-height:calc(100dvh - 110px);border-radius:16px;display:block;touch-action:pinch-zoom}
+.zoom .nav{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;width:100%;max-width:420px}
+.zoom .nav button{min-height:48px;border-radius:14px;border:0;background:#fff;font-weight:700;cursor:pointer}
+.zoom .nav .x{background:var(--ac);color:#fff}
+.zoom .cnt{color:#fff;font-size:15px}
+.inst{display:flex;align-items:center;gap:10px;width:100%;margin-top:8px;padding:10px 12px;border:1px solid var(--line);border-radius:16px;background:#F6F7F9}
+.hide{display:none!important}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="hdr">
+<img src="img/logo.webp" width="96" height="70" alt="شعار شي إن ستور للمنتجات المتنوعة" style="height:70px;width:auto;display:block">
+<a href="#order" class="btn btn-ac" style="min-height:44px;padding:0 16px;font-size:15px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-12.4 7.4L3 20.5l1.6-5.4A8.4 8.4 0 1 1 21 11.5z"/></svg>اطلب الآن</a>
+</header>
+
+<section class="hero">
+<h1>نطلب لك من SHEIN ونوصّله لباب بيتك</h1>
+<p>اختر ما يعجبك في تطبيق SHEIN، أرسل لنا رابط السلة، ونحن نتكفّل بالباقي: الشراء والشحن والتوصيل إلى جميع مدن ليبيا.</p>
+<div class="row2">
+<a href="#order" class="btn btn-ac">أرسل طلبك</a>
+<a href="#how" class="btn" style="background:#fff;color:var(--ac-d)">كيف أطلب؟</a>
+</div>
+</section>
+
+<section aria-labelledby="offers-t" style="display:flex;flex-direction:column;gap:10px">
+<h2 id="offers-t">عروض هذا الأسبوع</h2>
+<div class="offer">
+<img src="img/offer-2.webp" width="900" height="1350" loading="lazy" decoding="async" alt="إعلان: نجلب لك من SHEIN، سعر كيلو الشحن 15 دينار فقط، مدة وصول الشحنة من أسبوع إلى أسبوعين، والتوصيل لجميع مدن ليبيا. للطلب 0935469240">
+<div style="padding:14px 16px;display:flex;flex-direction:column;gap:4px"><b style="font-size:18px">سعر كيلو الشحن 15 دينار فقط</b><span class="mute" style="font-size:15px">نجلب لك من SHEIN بثقة وسهولة، مع متابعة الشحنة حتى تصل لباب بيتك.</span></div>
+</div>
+</section>
+
+<section id="how" style="display:flex;flex-direction:column;gap:12px">
+<h2>كيف أطلب؟</h2>
+<div class="card" style="display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;flex-direction:column"><b style="font-size:18px">قبل البدء: حمّل تطبيق SHEIN</b><span class="mute" style="font-size:15px">مجاناً، اختر نوع هاتفك</span></div>
+<div class="osb" id="os-ios">
+<b class="ost">آيفون</b>
+<a id="app-ios" class="ob" href="https://apps.apple.com/app/id878577184" target="_blank" rel="noopener"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="2" width="12" height="20" rx="2.5"/><path d="M11 18h2"/></svg>حمّل من App Store</a>
+</div>
+<div class="osb" id="os-android">
+<b class="ost">أندرويد</b>
+<span class="mute" style="font-size:14px">التطبيق غير متوفر في متجر Play بليبيا، فاختر إحدى الطريقتين:</span>
+<a class="ob" href="https://www.apkmirror.com/apk/roadget-business-pte-ltd/shein-the-hottest-trends-fashion/shein-shopping-online-12-3-0-release/shein-shopping-online-12-3-0-android-apk-download/" target="_blank" rel="noopener"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg><span>تحميل التطبيق (APK)</span></a>
+<details class="apkm">
+<summary>كيف أثبّت الملف؟ (ملف APKM)</summary>
+<p class="mute" style="font-size:14px;margin:8px 0 6px">ملف SHEIN يُحمَّل بصيغة APKM، وهذه الصيغة تحتاج تطبيقاً صغيراً لتثبيتها:</p>
+<ol>
+<li>ثبّت أولاً تطبيق <b>APKMirror Installer</b>:
+<div class="apkm-b"><a href="https://play.google.com/store/apps/details?id=com.apkmirror.helper.prod" target="_blank" rel="noopener">من متجر Play</a><a href="https://www.apkmirror.com/apk/apkmirror/apkmirror-installer-official/" target="_blank" rel="noopener">من APKMirror</a></div></li>
+<li>ارجع واضغط «تحميل التطبيق (APK)»، ثم اضغط «Download APK» في الصفحة التي تفتح، وتجاهل الإعلانات.</li>
+<li>افتح تطبيق APKMirror Installer، واضغط <b>Browse files</b>، واختر ملف SHEIN من مجلد التنزيلات.</li>
+<li>اضغط <b>Install package</b>. إذا ظهر إعلان قصير فانتظر انتهاءه.</li>
+<li>إذا طلب الهاتف الإذن، اضغط «الإعدادات» وفعّل «السماح من هذا المصدر»، ثم ارجع واضغط «تثبيت».</li>
+</ol>
+</details>
+<a class="wahelp" href="https://wa.me/218935469240?text=%D9%85%D8%B1%D8%AD%D8%A8%D8%A7%D9%8B%D8%8C%20%D8%A3%D8%B1%D9%8A%D8%AF%20%D9%85%D9%84%D9%81%20%D8%AA%D8%B7%D8%A8%D9%8A%D9%82%20SHEIN%20%D9%84%D9%84%D8%A3%D9%86%D8%AF%D8%B1%D9%88%D9%8A%D8%AF" target="_blank" rel="noopener"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-12.4 7.4L3 20.5l1.6-5.4A8.4 8.4 0 1 1 21 11.5z"/></svg><span>لم تستطع التحميل؟ اطلب ملف التطبيق منا عبر واتساب</span></a>
+<a class="ob alt" href="https://m.shein.com/ar/" target="_blank" rel="noopener"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg><span>التسوق من موقع SHEIN بدون تحميل</span></a>
+</div>
+</div>
+<div class="vid">
+<div style="display:flex;flex-direction:column"><b style="font-size:18px">شاهد طريقة الطلب بالفيديو</b><span class="mute" style="font-size:14px">من البحث حتى إرسال السلة، في دقيقتين</span></div>
+<video src="img/howto.mp4" poster="img/howto-poster.jpg" controls playsinline preload="none" width="720" height="1280" aria-label="فيديو يشرح طريقة الطلب من SHEIN حتى إرسال رابط السلة"></video>
+</div>
+<div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap"><b style="font-size:18px">الخطوات بالصور</b><span class="mute" style="font-size:14px">اسحب للخطوات، واضغط الصورة لتكبيرها</span></div>
+<div class="strip" id="strip"></div>
+<div class="card" style="display:flex;gap:12px;align-items:center">
+<span style="width:40px;height:40px;border-radius:13px;background:#DDF3E9;color:#0B5A3D;display:grid;place-items:center;flex:none"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m22 2-7 20-4-9-9-4z"/><path d="M22 2 11 13"/></svg></span>
+<div style="display:flex;flex-direction:column"><b style="font-size:18px">بعد نسخ الرابط: أرسله لنا</b><span class="mute" style="font-size:15px">الصقه في النموذج بالأسفل، ونرد عليك بالسعر النهائي</span></div>
+</div>
+</section>
+
+<section id="calc" class="calc">
+<h2>احسب سلتك بالدينار</h2>
+<span style="font-size:15px">اكتب إجمالي السلة بالدولار، أو أدخل سعر كل قطعة ونجمعها لك. تظهر خانة جديدة تلقائياً.</span>
+<div id="prows" style="display:flex;flex-direction:column;gap:8px"></div>
+<div class="res" aria-live="polite">
+<div class="l hide" id="r-pcs"><span>عدد القطع</span><b id="v-pcs">0</b></div>
+<div class="l"><span>الإجمالي بالدولار</span><b dir="ltr" id="v-usd">$0</b></div>
+<div class="l"><span>سعر الصرف اليوم</span><b id="v-rate">…</b></div>
+<div class="l big"><span style="font-size:17px;font-weight:700">الإجمالي بالدينار</span><b id="v-lyd">0 د.ل</b></div>
+<div class="l" style="font-size:16px"><span>العربون التقريبي (30%)</span><b id="v-dep">0 د.ل</b></div>
+</div>
+<span style="font-size:14px" id="calc-note">المبلغ تقريبي وغير شامل مصاريف الشحن.</span>
+</section>
+
+<section id="delivery" class="dl">
+<h2>أسعار التوصيل</h2>
+<div class="it"><div><b style="font-size:17px">داخل طرابلس (عادي)</b><span>من تاجوراء إلى جنزور</span></div><b>10 د.ل</b></div>
+<div class="it"><div><b style="font-size:17px">داخل طرابلس (فوري)</b><span>التسليم خلال ساعتين</span></div><b>15 د.ل</b></div>
+<div class="it"><div><b style="font-size:17px">باقي المدن</b><span>بنغازي والمدن الأخرى، حسب طبيعة الشحنة</span></div><b>20 – 30 د.ل</b></div>
+</section>
+
+<section id="order" class="card form" style="border-radius:26px;padding:20px">
+<h2 style="margin-bottom:4px">أرسل طلبك</h2>
+<label for="nm">الاسم</label>
+<input id="nm" autocomplete="name">
+<label for="ct">المدينة</label>
+<input id="ct" autocomplete="address-level2">
+<label for="ln">رابط السلة</label>
+<div style="position:relative">
+<textarea id="ln" dir="ltr" placeholder="الصق الرابط هنا" autocomplete="off"></textarea>
+<button type="button" class="paste" id="paste"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></svg>لصق</button>
+</div>
+<div class="msg err hide" id="err" role="alert"></div>
+<div class="msg ok hide" id="ok"></div>
+<button type="button" class="btn btn-ac" id="send" style="margin-top:6px;min-height:56px;border-radius:16px;font-size:18px;font-weight:800"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m22 2-7 20-4-9-9-4z"/><path d="M22 2 11 13"/></svg>أرسل الطلب عبر واتساب</button>
+<span class="mute" style="font-size:14px;text-align:center">يفتح واتساب برسالة جاهزة إلى <bdi dir="ltr">0935469240</bdi></span>
+</section>
+
+<section style="display:flex;flex-direction:column;gap:8px">
+<h2 style="margin-bottom:4px">أسئلة شائعة</h2>
+<details><summary>كم تستغرق الشحنة حتى تصل؟</summary><p>من أسبوع إلى أسبوعين.</p></details>
+<details><summary>إلى أي المدن توصلون؟</summary><p>التوصيل متاح إلى جميع مدن ليبيا، وأسعاره في قسم <a href="#delivery">«أسعار التوصيل»</a>.</p></details>
+<details><summary>كم العربون؟</summary><p>30% من قيمة السلة، وقد تتغير النسبة حسب قيمة الطلب.</p></details>
+<details><summary>هل يمكن إلغاء الطلب؟</summary><p>لا يمكن إلغاء الطلب.</p></details>
+<details><summary>هل السعر في الحاسبة نهائي؟</summary><p>السعر تقريبي، ويعتمد على سعر الصرف يوم الشراء.</p></details>
+</section>
+
+<footer>
+<b style="font-size:18px">متجر شي إن</b>
+<a href="tel:0935469240" dir="ltr" style="font-size:20px;font-weight:800;text-decoration:none">0935469240</a>
+<span class="mute" style="font-size:14px">هاتف وواتساب</span>
+<button type="button" class="share" id="share"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/></svg>شارك الصفحة مع صديق</button>
+<span class="hide" id="shared" style="font-size:14px;color:#0B5A3D">نُسخ رابط الصفحة، الصقه لمن تريد.</span>
+<div class="inst hide" id="inst">
+<img src="icon-192.png" width="44" height="44" alt="" style="border-radius:12px;flex:none">
+<div style="display:flex;flex-direction:column;flex:1;min-width:0;text-align:right"><b style="font-size:15px">ثبّت الصفحة على هاتفك</b><span class="mute" style="font-size:13px" id="inst-t">لترجع لها بلمسة عند طلبك القادم</span></div>
+<button type="button" id="inst-b" class="btn btn-ac hide" style="min-height:42px;padding:0 14px;font-size:15px">تثبيت</button>
+</div>
+<span class="mute" style="font-size:13px">متجر مستقل يطلب نيابة عنك من SHEIN، وليس تابعاً لشركة SHEIN.</span>
+</footer>
+
+<nav class="dock" aria-label="طلب سريع">
+<a href="#order" class="btn btn-ac wa"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-12.4 7.4L3 20.5l1.6-5.4A8.4 8.4 0 1 1 21 11.5z"/></svg>اطلب عبر واتساب</a>
+<a href="tel:0935469240" class="tel" aria-label="اتصال بالمتجر"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/></svg></a>
+</nav>
+</div>
+
+<div class="zoom" id="zoom" hidden role="dialog" aria-modal="true" aria-label="صورة الخطوة مكبّرة">
+<span class="cnt" id="zcnt"></span>
+<img id="zimg" alt="">
+<div class="nav">
+<button type="button" id="zprev">السابقة</button>
+<button type="button" class="x" id="zclose">إغلاق</button>
+<button type="button" id="znext">التالية</button>
+</div>
+</div>
+
+<script>
+(function(){
+"use strict";
+var PHONE="218935469240";
+var RATE_URL="https://firestore.googleapis.com/v1/projects/shein-orders08/databases/(default)/documents/public/store";
+var $=function(id){return document.getElementById(id)};
+function lsGet(k){try{return localStorage.getItem(k)}catch(e){return null}}
+function lsSet(k,v){try{localStorage.setItem(k,v)}catch(e){}}
+var AR="٠١٢٣٤٥٦٧٨٩";
+function toNum(v){return Number(String(v||"").replace(/[٠-٩]/g,function(d){return AR.indexOf(d)}).replace(/[,٫]/g,".").replace(/[^0-9.]/g,""))||0}
+function arNum(k){return String(k).replace(/\d/g,function(d){return AR[d]})}
+function fmt(v){return(Math.round(v*100)/100).toLocaleString("en-US")}
+
+// ---- خطوات الطلب بالصور ----
+var STEPS=["اكتب اسم ما تبحث عنه في خانة البحث","اضغط على المنتج الذي يعجبك","اختر اللون والمقاس ثم أضف إلى عربة التسوق","اضغط على أيقونة السلة","في السلة اضغط على النقاط الثلاث ثم «شاركي»","حدد كل المنتجات ثم اضغط «شارك»","اضغط «نسخ الرابط» أو أرسله عبر واتساب"];
+var strip=$("strip"),zi=-1,lastFocus=null;
+STEPS.forEach(function(t,i){var b=document.createElement("button");b.type="button";b.setAttribute("aria-label","تكبير الخطوة "+(i+1));
+ b.innerHTML='<img src="img/step-'+(i+1)+'-s.webp" width="240" height="491" loading="lazy" decoding="async" alt="الخطوة '+(i+1)+': '+t+'">';
+ b.onclick=function(){lastFocus=b;openZoom(i)};strip.appendChild(b)});
+function openZoom(i){zi=(i+STEPS.length)%STEPS.length;var im=$("zimg");im.src="img/step-"+(zi+1)+".webp";im.alt="الخطوة "+(zi+1)+": "+STEPS[zi];
+ $("zcnt").textContent="الخطوة "+arNum(zi+1)+" من "+arNum(STEPS.length);$("zoom").hidden=false;document.body.style.overflow="hidden";$("zclose").focus();
+ var nx=new Image();nx.src="img/step-"+((zi+1)%STEPS.length+1)+".webp"}
+function closeZoom(){$("zoom").hidden=true;zi=-1;document.body.style.overflow="";if(lastFocus)lastFocus.focus()}
+$("zclose").onclick=closeZoom;$("znext").onclick=function(){openZoom(zi+1)};$("zprev").onclick=function(){openZoom(zi-1)};
+$("zoom").addEventListener("click",function(e){if(e.target===this)closeZoom()});
+document.addEventListener("keydown",function(e){if(zi<0)return;if(e.key==="Escape")closeZoom();else if(e.key==="ArrowLeft")openZoom(zi+1);else if(e.key==="ArrowRight")openZoom(zi-1)});
+var sx=null;$("zimg").addEventListener("touchstart",function(e){sx=e.touches.length===1?e.touches[0].clientX:null},{passive:true});
+$("zimg").addEventListener("touchend",function(e){if(sx===null)return;var dx=e.changedTouches[0].clientX-sx;sx=null;if(Math.abs(dx)>50)openZoom(dx<0?zi+1:zi-1)});
+
+// ---- إبراز رابط التطبيق المناسب لهاتف الزبون ----
+var ua=navigator.userAgent||"";
+// قسم نظام هاتف الزبون يظهر أولاً ومميزاً
+var osA=$("os-android"),osI=$("os-ios");
+if(/android/i.test(ua)){osA.classList.add("mine");osA.parentNode.insertBefore(osA,osI)}
+else if(/iphone|ipad|ipod/i.test(ua)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1))osI.classList.add("mine");
+
+// ---- حاسبة السلة ----
+var rate=toNum(lsGet("store_rate")),items=[""];
+function renderRows(focusIdx){var box=$("prows");box.innerHTML="";
+ items.forEach(function(v,i){var last=i===items.length-1&&String(v).trim()==="";
+  var row=document.createElement("div");row.className="prow";
+  row.innerHTML='<span class="pnum">'+arNum(i+1)+'</span><div class="pin"><input inputmode="decimal" dir="ltr" autocomplete="off" aria-label="السعر '+(i+1)+' بالدولار" placeholder="'+(i===0?"إجمالي السلة أو سعر القطعة":(last?"أضف سعراً آخر":"0.00"))+'"><span>$</span></div>'+
+   (last?(i>0?'<span class="padd" aria-hidden="true">+</span>':''):'<button type="button" class="pdel" aria-label="حذف السعر '+(i+1)+'">×</button>');
+  var inp=row.querySelector("input");inp.value=v;
+  inp.addEventListener("input",function(){items[i]=inp.value;
+   if(i===items.length-1&&inp.value.trim()!==""){items.push("");renderRows(i);return}
+   update()});
+  var del=row.querySelector(".pdel");if(del)del.onclick=function(){items.splice(i,1);if(!items.length||String(items[items.length-1]).trim()!=="")items.push("");renderRows();update()};
+  box.appendChild(row)});
+ if(focusIdx!=null){var f=box.querySelectorAll("input")[focusIdx];if(f){f.focus();var L=f.value.length;try{f.setSelectionRange(L,L)}catch(e){}}}
+ update()}
+function update(){var vals=items.map(toNum).filter(function(x){return x>0}),usd=vals.reduce(function(a,b){return a+b},0);
+ $("r-pcs").classList.toggle("hide",vals.length<2);$("v-pcs").textContent=vals.length;$("v-usd").textContent="$"+fmt(usd);
+ if(rate>0){$("v-rate").textContent=fmt(rate)+" د.ل";$("v-lyd").textContent=fmt(usd*rate)+" د.ل";$("v-dep").textContent=fmt(usd*rate*0.3)+" د.ل"}
+ else{$("v-rate").textContent="اسألنا عنه";$("v-lyd").textContent="—";$("v-dep").textContent="—"}}
+renderRows();
+// سعر الصرف يحدده المتجر من تطبيق الطلبات، ويُحفظ آخر سعر في الهاتف للزيارة القادمة
+fetch(RATE_URL,{cache:"no-store"}).then(function(r){return r.ok?r.json():null}).then(function(j){
+ var f=j&&j.fields&&j.fields.rate,v=f?toNum(f.doubleValue!=null?f.doubleValue:f.integerValue):0;
+ if(v>0){rate=v;lsSet("store_rate",String(v));update()}}).catch(function(){});
+
+// ---- نموذج الطلب ----
+var nm=$("nm"),ct=$("ct"),ln=$("ln");
+function showErr(t){$("ok").classList.add("hide");var e=$("err");e.textContent=t;e.classList.toggle("hide",!t)}
+[nm,ct,ln].forEach(function(x){x.addEventListener("input",function(){showErr("");$("ok").classList.add("hide")})});
+nm.value=lsGet("store_nm")||"";ct.value=lsGet("store_ct")||"";
+$("paste").onclick=function(){var fail=function(){ln.focus();showErr("اضغط مطولاً داخل الخانة واختر «لصق».")};
+ try{navigator.clipboard.readText().then(function(t){t=(t||"").trim();if(!t){fail();return}ln.value=t;showErr("")},fail)}catch(e){fail()}};
+$("send").onclick=function(){var name=nm.value.trim(),city=ct.value.trim(),link=ln.value.trim();
+ if(!name){showErr("اكتب اسمك أولاً.");nm.focus();return}
+ if(!link){showErr("الصق رابط السلة أولاً. تجده في الخطوة 7 من «كيف أطلب؟».");ln.focus();return}
+ if(!/shein/i.test(link)){showErr("هذا لا يبدو رابط سلة من SHEIN. انسخه من زر «نسخ الرابط» في التطبيق.");ln.focus();return}
+ lsSet("store_nm",name);lsSet("store_ct",city);count("orders");
+ var msg="مرحباً، أريد الطلب من SHEIN\nالاسم: "+name+(city?"\nالمدينة: "+city:"")+"\nرابط السلة: "+link;
+ var vals=items.map(toNum).filter(function(x){return x>0});if(vals.length){var u=vals.reduce(function(a,b){return a+b},0);msg+="\nإجمالي السلة تقريباً: $"+fmt(u)}
+ showErr("");var ok=$("ok");ok.innerHTML="";var b=document.createElement("b");b.textContent="يفتح واتساب الآن بهذه الرسالة:";ok.appendChild(b);ok.appendChild(document.createTextNode("\n"+msg));ok.classList.remove("hide");
+ location.href="https://wa.me/"+PHONE+"?text="+encodeURIComponent(msg)};
+
+// ---- مشاركة الصفحة ----
+$("share").onclick=function(){var url=location.origin+location.pathname,data={title:"شي إن ستور",text:"اطلب من SHEIN بسهولة ويوصلك لباب بيتك",url:url};
+ if(navigator.share){navigator.share(data).catch(function(){});return}
+ try{navigator.clipboard.writeText(url).then(function(){$("shared").classList.remove("hide")})}catch(e){}};
+
+// ---- عداد الزوار والطلبات: زائر واحد لكل هاتف في اليوم، يظهر لصاحب المتجر في تطبيق الطلبات ----
+function day(){try{return new Date().toLocaleDateString("en-CA",{timeZone:"Africa/Tripoli"})}catch(e){return new Date().toISOString().slice(0,10)}}
+function count(field){if(/^(localhost|127\.)/.test(location.hostname))return;
+ var d=day(),k="store_cnt_"+field;if(lsGet(k)===d)return;
+ var base="projects/shein-orders08/databases/(default)/documents";
+ fetch("https://firestore.googleapis.com/v1/"+base+":commit",{method:"POST",headers:{"Content-Type":"application/json"},keepalive:true,
+  body:JSON.stringify({writes:[{transform:{document:base+"/stats/"+d,fieldTransforms:[{fieldPath:field,increment:{integerValue:"1"}}]}}]})})
+ .then(function(r){if(r.ok)lsSet(k,d)}).catch(function(){})}
+count("visits");
+
+// ---- تثبيت الصفحة كتطبيق ----
+var standalone=(window.matchMedia&&matchMedia("(display-mode: standalone)").matches)||navigator.standalone===true;
+if("serviceWorker" in navigator)window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){})});
+var deferred=null;
+if(!standalone){
+ window.addEventListener("beforeinstallprompt",function(e){e.preventDefault();deferred=e;$("inst").classList.remove("hide");$("inst-b").classList.remove("hide")});
+ var isIOS=/iphone|ipad|ipod/i.test(ua)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);
+ if(isIOS){$("inst").classList.remove("hide");$("inst-t").textContent="اضغط زر المشاركة في Safari ثم «إضافة إلى الشاشة الرئيسية»"}
+}
+$("inst-b").onclick=function(){if(!deferred)return;deferred.prompt();deferred.userChoice.then(function(){deferred=null;$("inst").classList.add("hide")})};
+window.addEventListener("appinstalled",function(){$("inst").classList.add("hide")});
+})();
+</script>
+</body>
+</html>
