@@ -12,7 +12,8 @@ const json = (obj, status = 200) => new Response(JSON.stringify(obj), {
 // الكوكيز التي يضعها SHEIN تُرسل مع الطلبات التالية في نفس العملية
 function jarHeader(jar) { return Object.entries(jar).map(([k, v]) => k + "=" + v).join("; "); }
 function jarStore(jar, res) {
-  const list = typeof res.headers.getSetCookie === "function" ? res.headers.getSetCookie() : (res.headers.get("set-cookie") ? [res.headers.get("set-cookie")] : []);
+  // getSetCookie غير متوفرة في كل البيئات؛ وإلا نقسم الترويسة المدمجة عند كل «, اسم=»
+  const list = typeof res.headers.getSetCookie === "function" ? res.headers.getSetCookie() : (res.headers.get("set-cookie") || "").split(/,(?=\s*[^;,=\s]+=)/).filter(Boolean);
   for (const c of list) { const m = c.match(/^\s*([^=;\s]+)=([^;]*)/); if (m) jar[m[1]] = m[2]; }
 }
 

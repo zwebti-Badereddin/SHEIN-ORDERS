@@ -6,14 +6,14 @@
 <title>شي إن ستور: اطلب من SHEIN بسهولة</title>
 <meta name="description" content="نطلب لك من SHEIN ونوصّله لباب بيتك. حاسبة السلة، خطوات الطلب بالصور، والتوصيل إلى جميع مدن ليبيا.">
 <meta name="theme-color" content="#0E7C86">
-<link rel="canonical" href="https://sheinstore-ly.netlify.app/">
+<link rel="canonical" href="https://sheinstore-ly.pages.dev/">
 <meta property="og:type" content="website">
 <meta property="og:locale" content="ar_LY">
 <meta property="og:site_name" content="شي إن ستور">
 <meta property="og:title" content="شي إن ستور: اطلب من SHEIN بسهولة">
 <meta property="og:description" content="حاسبة السلة، خطوات الطلب بالصور، والتوصيل إلى جميع مدن ليبيا.">
-<meta property="og:url" content="https://sheinstore-ly.netlify.app/">
-<meta property="og:image" content="https://sheinstore-ly.netlify.app/img/og.jpg">
+<meta property="og:url" content="https://sheinstore-ly.pages.dev/">
+<meta property="og:image" content="https://sheinstore-ly.pages.dev/img/og.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
@@ -356,7 +356,8 @@ $("lc-go").onclick=function(){var raw=$("lc-u").value.trim(),m=raw.match(/https?
  if(!u){lcMsg("الصق رابط السلة أولاً. تجده في الخطوة 7 من «كيف أطلب؟».",1);return}
  if(!/shein/i.test(u)){lcMsg("هذا لا يبدو رابط سلة من SHEIN. انسخه من زر «نسخ الرابط» في التطبيق.",1);return}
  btn.disabled=true;btn.textContent="جارٍ قراءة السلة…";lcMsg("نقرأ سلتك من SHEIN، قد يستغرق ذلك بضع ثوانٍ.");list.classList.add("hide");
- fetch("/.netlify/functions/cart?url="+encodeURIComponent(u)).then(function(r){return r.json()}).then(function(j){
+ // على Cloudflare الدالة في /api/cart، وعلى Netlify في /.netlify/functions/cart
+ fetch("/api/cart?url="+encodeURIComponent(u)).then(function(r){return r.status===404||r.status===405?fetch("/.netlify/functions/cart?url="+encodeURIComponent(u)):r}).then(function(r){return r.json()}).then(function(j){
   if(!j||!j.ok||!j.items||!j.items.length){lcMsg("لم نتمكن من قراءة هذه السلة. أدخل الأسعار بنفسك بالأسفل، أو أرسل لنا الرابط ونحسبها لك.",1);return}
   // كل قطعة في خانة، حتى يكون عدد القطع صحيحاً مع الكميات
   items=[];j.items.forEach(function(it){for(var q=0;q<Math.min(it.qty||1,50);q++)items.push(String(it.price))});items.push("");renderRows();
