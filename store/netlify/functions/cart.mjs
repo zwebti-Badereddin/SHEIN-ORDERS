@@ -2,6 +2,7 @@
 // الاستخدام: /.netlify/functions/cart?url=<رابط السلة>   (أضف &debug=1 لرؤية ما وصل من SHEIN كما هو)
 const UA = "Mozilla/5.0 (Linux; Android 14; SM-A546B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Mobile Safari/537.36";
 const OK_HOST = /(^|\.)(shein\.com|shein\.top|sheingroup\.com|shein\.co\.uk|onelink\.me)$/i;
+const ASSET_HOST = /(^|\.)ltwebstatic\.com$/i;
 
 const json = (obj, status = 200) => new Response(JSON.stringify(obj), {
   status, headers: { "content-type": "application/json; charset=utf-8", "access-control-allow-origin": "*", "cache-control": "no-store" }
@@ -91,6 +92,26 @@ function extract(html) {
   return items;
 }
 
+// يبحث في صفحة السلة وملفات الجافاسكربت التابعة لها عن مسارات الطلبات التي تخص مشاركة السلة
+async function discover(html) {
+  const uniq = (a) => [...new Set(a)];
+  const shareStrings = uniq((html.match(/["'`][^"'`\s<>]{0,120}(?:share|landing)[^"'`\s<>]{0,120}["'`]/gi) || []).map((x) => x.slice(1, -1))).slice(0, 80);
+  const assetRe = /(?:https?:)?\/\/[a-z0-9.-]*ltwebstatic\.com\/[^"'\s<>]+?\.js/gi;
+  const allJs = uniq((html.match(assetRe) || []).map((u) => (u.startsWith("//") ? "https:" + u : u)));
+  const chunkNames = uniq((html.match(/[\w-]*(?:cart|share|landing)[\w-]*\.[0-9a-f]{6,}\.js|[\w-]*(?:cart|share|landing)[\w-]*-[0-9a-f]{8,}\.js/gi) || [])).slice(0, 60);
+  const candidates = allJs.filter((u) => /cart|share|landing/i.test(u.split("/").pop())).slice(0, 8);
+  const found = {};
+  for (const u of candidates) {
+    try {
+      if (!ASSET_HOST.test(new URL(u).hostname)) continue;
+      const t = await (await fetch(u, { headers: { "user-agent": UA } })).text();
+      found[u.split("/").pop()] = uniq((t.match(/["'`](\/(?:bff-api|api|h5)\/[^"'`\s]{3,160})["'`]/g) || []).map((x) => x.slice(1, -1)).filter((x) => /share|landing|group/i.test(x))).slice(0, 40);
+    } catch (e) { found[u] = "fetch failed: " + e.message; }
+  }
+  return { shareStrings, jsCount: allJs.length, chunkNames, candidates, apiInChunks: found,
+    manifestHint: (() => { const i = html.search(/resourceManiFest|_whenLoadChunkNameMap/); return i < 0 ? "" : html.slice(i, i + 3000); })() };
+}
+
 function debugInfo(html) {
   const around = (word) => { const out = []; let i = -1; while (out.length < 3 && (i = html.indexOf(word, i + 1)) >= 0) out.push(html.slice(Math.max(0, i - 300), i + 500)); return out; };
   return {
@@ -120,19 +141,22 @@ export default async (req) => {
   const trail = [];
   try {
     let r = await fetchFollow(link, trail);
-    let items = extract(r.body), landing = null;
+    let items = extract(r.body), landing = null, firstLanding = null;
     if (!items.length) {
       landing = cartLanding(r.body, r.finalUrl);
       for (const u of (landing ? landing.urls : [])) {
         const r2 = await fetchFollow(u, trail);
+        if (!firstLanding) firstLanding = r2;
         const it2 = extract(r2.body);
         r = r2; items = it2;
         if (it2.length) break;
       }
     }
+    // صفحة السلة تطبيق جافاسكربت يجلب المنتجات بطلب منفصل؛ في وضع التشخيص نبحث عن اسم هذا الطلب في ملفات الصفحة
+    if (!items.length && debug && firstLanding) { r = firstLanding; }
     const out = { ok: items.length > 0, count: items.length, total: Math.round(items.reduce((s, x) => s + x.price * x.qty, 0) * 100) / 100, items, finalUrl: r.finalUrl };
     if (!items.length) { out.error = "no_items"; out.message = "لم نتمكن من قراءة منتجات السلة من هذا الرابط"; }
-    if (debug) { out.trail = trail; out.landing = landing; out.debug = debugInfo(r.body); }
+    if (debug) { out.trail = trail; out.landing = landing; out.debug = debugInfo(r.body); if (!items.length && firstLanding) out.discover = await discover(firstLanding.body); }
     return json(out);
   } catch (e) {
     return json({ ok: false, error: "fetch_failed", message: "تعذّر الوصول إلى SHEIN", detail: String(e && e.message || e), trail }, 502);
