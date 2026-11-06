@@ -136,10 +136,25 @@ async function discover(html) {
           }
         }
       }
+      // النص الكامل لملف صفحة مشاركة السلة (صغير)، لنرى من أين تجلب المنتجات
+      const bff = runtimeInfo.chunks.find((c) => /cart_share_bff\./.test(c.url) && c.status === 200);
+      if (bff) { try { runtimeInfo.cartShareBffText = (await (await fetch(bff.url, { headers: { "user-agent": UA } })).text()).slice(0, 9000); } catch {} }
       runtimeInfo.sample = (() => { const i = t.search(/share/i); return i < 0 ? "" : t.slice(Math.max(0, i - 400), i + 600); })();
     } catch (e) { runtimeInfo.error = e.message; }
   }
-  return { runtime: rt, runtimeInfo, jsCount: allJs.length, chunkNames, apiInChunks: found,
+  // كل ملفات الصفحة بالتوازي: نجمع كل مسار يحتوي share (مثل /order/cart/share/...)
+  const shareApis = {};
+  const ctl = new AbortController(); const timer = setTimeout(() => ctl.abort(), 6000);
+  await Promise.all(allJs.slice(0, 90).map(async (u) => {
+    try {
+      if (!ASSET_HOST.test(new URL(u).hostname)) return;
+      const t = await (await fetch(u, { headers: { "user-agent": UA }, signal: ctl.signal })).text();
+      const hits = uniq((t.match(/["'`](\/[\w\-/]*(?:share|group_?id)[\w\-/]*)["'`]/gi) || []).map((x) => x.slice(1, -1))).filter((x) => x.length > 6 && x.split("/").length > 2);
+      if (hits.length) shareApis[u.split("/").pop()] = hits.slice(0, 30);
+    } catch {}
+  }));
+  clearTimeout(timer);
+  return { shareApis, runtime: rt, runtimeInfo, jsCount: allJs.length, chunkNames, apiInChunks: found,
     manifestHint: (() => { const i = html.search(/resourceManiFest|_whenLoadChunkNameMap/); return i < 0 ? "" : html.slice(i, i + 3000); })() };
 }
 
