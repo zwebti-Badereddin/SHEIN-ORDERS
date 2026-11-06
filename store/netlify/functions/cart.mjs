@@ -71,16 +71,17 @@ async function bffLanding(landingUrl, info, jar, attempts, pageHtml) {
   const headers = { "user-agent": UA, "accept": "application/json, text/plain, */*", "x-requested-with": "XMLHttpRequest", "referer": landingUrl, "origin": u.origin,
     "AppCurrency": "USD", "AppLanguage": appLang, ...(csrf ? { "x-csrf-token": csrf } : {}), ...(Object.keys(jar).length ? { cookie: jarHeader(jar) } : {}) };
   const id = String(info.id), lc = info.localcountry || "", uf = info.url_from || "";
+  // الشكل الذي نجح مع SHEIN: {groupId, localCountry} بصيغة JSON؛ البقية احتياط إن تغيّر
   const variants = [
+    { groupId: id, localCountry: lc },
     { group_id: id, local_country: lc },
     { group_id: id, local_country: lc, url_from: uf, cart_share: String(info.cart_share || 1) },
-    { groupId: id, localCountry: lc },
     { group_id: id, localcountry: lc },
     { share_id: id, local_country: lc },
     { group_id: id }
   ];
   for (const v of variants) {
-    for (const enc of ["json", "form"]) {
+    for (const enc of (v.groupId ? ["json"] : ["json", "form"])) {
       const body = enc === "json" ? JSON.stringify(v) : new URLSearchParams(v).toString();
       const url = base + "/order/cart/share/landing?_ver=1.1.8&_lang=" + encodeURIComponent(appLang);
       try {
@@ -88,13 +89,24 @@ async function bffLanding(landingUrl, info, jar, attempts, pageHtml) {
         jarStore(jar, res);
         const text = await res.text();
         const items = extract(text).length ? extract(text) : walkItems(text);
-        attempts.push({ enc, body: v, status: res.status, length: text.length, items: items.length, head: text.slice(0, items.length ? 600 : 2500) });
+        attempts.push({ enc, body: v, status: res.status, length: text.length, items: items.length, head: text.slice(0, items.length ? 300 : 2500) });
+        if (items.length) { try { const j = JSON.parse(text), np = j.info && (j.info.normalProducts || [])[0]; if (np) attempts.sample = JSON.stringify(np).slice(0, 6000); } catch {} }
         if (items.length) return items;
         if (text.length > 200) return items; // رد فيه بيانات لكن لم نتعرف على شكلها: نتوقف لنراه
       } catch (e) { attempts.push({ enc, body: v, error: e.message }); }
     }
   }
   return [];
+}
+
+// اللون/المقاس: نجرب الحقول المعروفة، ثم أي قائمة خصائص فيها attr_value_name
+function attrOf(o) {
+  const direct = o.attr_value_en || o.attr_value || o.goods_attr || o.goodsAttr || o.attrValue || o.saleAttrDesc || o.sku_sale_attr_desc;
+  if (typeof direct === "string" && direct) return direct;
+  const lists = [o.sku_sale_attr, o.skuSaleAttr, o.attr, o.saleAttrs, o.product && o.product.sku_sale_attr].filter(Array.isArray);
+  for (const L of lists) { const v = L.map((a) => a && (a.attr_value_name || a.attrValueName || a.attr_value || a.value)).filter(Boolean); if (v.length) return v.join(" / "); }
+  if (o.attr && typeof o.attr === "object" && !Array.isArray(o.attr)) { const v = o.attr.attr_value_en || o.attr.attr_value || o.attr.attr_value_name; if (v) return v; }
+  return "";
 }
 
 // قراءة عامة لأي رد JSON: كل كائن فيه اسم منتج وسعر
@@ -109,7 +121,7 @@ function walkItems(text) {
     const p = name ? price(o) : 0;
     if (name && p) {
       const it = { name, sku: o.goods_sn || o.goodsSn || o.sku_code || "", price: p, orig: num((o.retailPrice && (o.retailPrice.usdAmount ?? o.retailPrice.amount)) || o.retail_price), qty: Math.max(1, num(o.quantity) || 1),
-        attr: o.attr_value_en || o.attr_value || o.goods_attr || "", img: o.goods_img || o.goodsImg || "" };
+        attr: attrOf(o), img: o.goods_img || o.goodsImg || "" };
       const key = it.sku + "|" + it.attr + "|" + it.price; if (!seen.has(key)) { seen.add(key); out.push(it); }
     }
     Object.values(o).forEach((x) => walk(x, d + 1));
@@ -289,7 +301,7 @@ export default async (req) => {
     if (!items.length) { out.error = "no_items"; out.message = "لم نتمكن من قراءة منتجات السلة من هذا الرابط"; }
     if (debug) {
       out.csrfInPage = firstLanding ? /csrf_token/.test(firstLanding.body) : null;
-      out.trail = trail; out.landing = landing && landing.info; out.bffAttempts = bffAttempts; out.cookies = Object.keys(jar);
+      out.trail = trail; out.landing = landing && landing.info; out.bffAttempts = bffAttempts; out.productSample = bffAttempts.sample || ""; out.cookies = Object.keys(jar);
       if (!items.length && firstLanding) out.apiContext = await apiContext(firstLanding.body);
     }
     return json(out);
