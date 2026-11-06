@@ -1,0 +1,7 @@
+# صفحة المتجر: ملفات ثابتة + دالة تقرأ سلة SHEIN من رابطها
+[build]
+  publish = "."
+  functions = "netlify/functions"
+
+[functions]
+  node_bundler = "esbuild"

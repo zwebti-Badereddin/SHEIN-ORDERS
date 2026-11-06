@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>تجربة قراءة السلة</title>
+<style>
+body{margin:0;background:#F4F7F8;color:#13202B;font-family:Tahoma,sans-serif;font-size:16px}
+.w{max-width:640px;margin:0 auto;padding:16px;display:flex;flex-direction:column;gap:10px}
+textarea{width:100%;box-sizing:border-box;min-height:80px;border:1px solid #D5DAE2;border-radius:12px;padding:10px;font-size:15px}
+button{min-height:48px;border:0;border-radius:12px;background:#0E7C86;color:#fff;font-size:16px;font-weight:700}
+button.sec{background:#fff;color:#13202B;border:1px solid #D5DAE2}
+pre{white-space:pre-wrap;word-break:break-all;background:#fff;border:1px solid #E1E6EC;border-radius:12px;padding:10px;font-size:12px;max-height:60vh;overflow:auto;direction:ltr;text-align:left}
+.it{background:#fff;border:1px solid #E1E6EC;border-radius:12px;padding:10px}
+</style>
+</head>
+<body>
+<div class="w">
+<h1 style="font-size:20px;margin:0">تجربة قراءة سلة SHEIN من الرابط</h1>
+<p style="margin:0;color:#5F6776">صفحة للتجربة فقط ولا تظهر للزبائن. الصق رابط سلة واضغط «اقرأ».</p>
+<textarea id="u" dir="ltr" placeholder="https://..."></textarea>
+<button id="go">اقرأ</button>
+<div id="res"></div>
+<button class="sec" id="cp" hidden>نسخ النتيجة كاملة لإرسالها</button>
+<pre id="raw" hidden></pre>
+</div>
+<script>
+var last="";
+document.getElementById("go").onclick=function(){var u=document.getElementById("u").value.trim(),res=document.getElementById("res"),raw=document.getElementById("raw");
+ if(!u)return;res.textContent="جارٍ القراءة…";raw.hidden=true;
+ fetch("/.netlify/functions/cart?debug=1&url="+encodeURIComponent(u)).then(function(r){return r.text()}).then(function(t){last=t;var j={};try{j=JSON.parse(t)}catch(e){}
+  res.innerHTML="";var h=document.createElement("div");h.className="it";
+  h.textContent=j.ok?("تمت القراءة: "+j.count+" منتج، المجموع $"+j.total):("لم تنجح القراءة: "+(j.message||j.error||"خطأ غير معروف"));res.appendChild(h);
+  (j.items||[]).forEach(function(x){var d=document.createElement("div");d.className="it";d.textContent=x.name+" | "+(x.attr||"")+" | $"+x.price+(x.orig?" (قبل الخصم $"+x.orig+")":"")+" × "+x.qty;res.appendChild(d)});
+  raw.textContent=t.slice(0,20000);raw.hidden=false;document.getElementById("cp").hidden=false})
+ .catch(function(e){res.textContent="خطأ في الاتصال: "+e})};
+document.getElementById("cp").onclick=function(){try{navigator.clipboard.writeText(last).then(function(){alert("تم النسخ")})}catch(e){}};
+</script>
+</body>
+</html>

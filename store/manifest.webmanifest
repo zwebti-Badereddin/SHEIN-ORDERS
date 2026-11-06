@@ -1,0 +1,17 @@
+{
+  "name": "شي إن ستور: اطلب من SHEIN",
+  "short_name": "شي إن ستور",
+  "description": "اطلب من SHEIN بسهولة ويوصلك لباب بيتك في جميع مدن ليبيا",
+  "lang": "ar",
+  "dir": "rtl",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#FFFFFF",
+  "theme_color": "#0E7C86",
+  "icons": [
+    {"src": "icon-192.png", "sizes": "192x192", "type": "image/png"},
+    {"src": "icon-512.png", "sizes": "512x512", "type": "image/png"},
+    {"src": "icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"}
+  ]
+}
