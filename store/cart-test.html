@@ -18,7 +18,7 @@ pre{white-space:pre-wrap;word-break:break-all;background:#fff;border:1px solid #
 <body>
 <div class="w">
 <h1 style="font-size:20px;margin:0">تجربة قراءة سلة SHEIN من الرابط</h1>
-<p style="margin:0;color:#5F6776">صفحة للتجربة فقط ولا تظهر للزبائن. الصق رابط سلة واضغط «اقرأ». (نسخة 6)</p>
+<p style="margin:0;color:#5F6776">صفحة للتجربة فقط ولا تظهر للزبائن. الصق رابط سلة واضغط «اقرأ». (نسخة 7)</p>
 <textarea id="u" dir="ltr" placeholder="https://..."></textarea>
 <button id="go">اقرأ</button>
 <div id="res"></div>
@@ -29,7 +29,7 @@ pre{white-space:pre-wrap;word-break:break-all;background:#fff;border:1px solid #
 var last="";
 document.getElementById("go").onclick=function(){var u=document.getElementById("u").value.trim(),res=document.getElementById("res"),raw=document.getElementById("raw");
  if(!u)return;res.textContent="جارٍ القراءة…";raw.hidden=true;
- fetch("/.netlify/functions/cart?debug=1&url="+encodeURIComponent(u)).then(function(r){return r.text()}).then(function(t){last=t;var j={};try{j=JSON.parse(t)}catch(e){}
+ fetch("/api/cart?debug=1&url="+encodeURIComponent(u)).then(function(r){return r.status===404||r.status===405?fetch("/.netlify/functions/cart?debug=1&url="+encodeURIComponent(u)):r}).then(function(r){return r.text()}).then(function(t){last=t;var j={};try{j=JSON.parse(t)}catch(e){}
   res.innerHTML="";var h=document.createElement("div");h.className="it";
   h.textContent=j.ok?("تمت القراءة: "+j.count+" منتج، المجموع $"+j.total):("لم تنجح القراءة: "+(j.message||j.error||"خطأ غير معروف"));res.appendChild(h);
   (j.items||[]).forEach(function(x){var d=document.createElement("div");d.className="it";d.textContent=x.name+" | "+(x.attr||"")+" | $"+x.price+(x.orig?" (قبل الخصم $"+x.orig+")":"")+" × "+x.qty;res.appendChild(d)});
