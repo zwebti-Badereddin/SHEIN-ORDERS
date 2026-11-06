@@ -35,6 +35,23 @@ const num = (v) => { const n = parseFloat(String(v ?? "").replace(/[^0-9.]/g, ""
 const pick = (s, re) => { const m = s.match(re); return m ? m[1] : ""; };
 const unesc = (s) => { try { return JSON.parse('"' + s + '"'); } catch { return s; } };
 
+// صفحة appjump تحمل shareInfo (رقم مجموعة السلة والدولة)، وتنقل الجوال إلى:
+// <موقع الدولة>/cart/share/landing?shc=..&group_id=..&local_country=..&url_from=..&cart_share=1
+function cartLanding(html, fromUrl) {
+  const i = html.search(/shareInfo\s*=\s*\{/); if (i < 0) return null;
+  let info; try { info = JSON.parse(enclosing(html, html.indexOf("{", i) + 1)); } catch { return null; }
+  if (!/cart/.test(info.share_type || "")) return null;
+  const lc = info.localcountry || "";
+  // موقع الجوال الخاص بالدولة: نبحث في الصفحة عن عنصر فيه siteUrl ويذكر رمز الدولة
+  const sites = []; const re = /"?siteUrl"?\s*:\s*["']([^"']+)["']/g; let m;
+  while ((m = re.exec(html))) { const obj = enclosing(html, m.index); sites.push({ site: m[1], hit: lc && new RegExp("[\"']" + lc + "[\"']").test(obj) }); }
+  const hit = sites.find((x) => x.hit);
+  let shc = ""; try { shc = new URL(info.originalUrl || fromUrl).searchParams.get("shc") || ""; } catch {}
+  const qs = `/cart/share/landing?shc=${encodeURIComponent(shc)}&group_id=${encodeURIComponent(info.id)}&local_country=${encodeURIComponent(lc)}&url_from=${encodeURIComponent(info.url_from || "")}${info.cart_share ? "&cart_share=" + info.cart_share : ""}`;
+  const bases = [...new Set([hit && "https://" + hit.site.replace(/^https?:\/\//, ""), "https://m.shein.com/ar", "https://m.shein.com"].filter(Boolean))];
+  return { info: { id: info.id, localcountry: lc, url_from: info.url_from, cart_share: info.cart_share }, sites: sites.slice(0, 30), urls: bases.map((b) => b.replace(/\/$/, "") + qs) };
+}
+
 // الكائن الذي يحتوي الموضع i: نرجع حتى «{» التي تفتحه، ثم نتقدم حتى «}» التي تغلقه
 function enclosing(s, i) {
   let d = 0, a = i;
@@ -102,11 +119,20 @@ export default async (req) => {
   if (!OK_HOST.test(host)) return json({ ok: false, error: "not_shein", message: "هذا ليس رابط سلة من SHEIN" }, 400);
   const trail = [];
   try {
-    const r = await fetchFollow(link, trail);
-    const items = extract(r.body);
+    let r = await fetchFollow(link, trail);
+    let items = extract(r.body), landing = null;
+    if (!items.length) {
+      landing = cartLanding(r.body, r.finalUrl);
+      for (const u of (landing ? landing.urls : [])) {
+        const r2 = await fetchFollow(u, trail);
+        const it2 = extract(r2.body);
+        r = r2; items = it2;
+        if (it2.length) break;
+      }
+    }
     const out = { ok: items.length > 0, count: items.length, total: Math.round(items.reduce((s, x) => s + x.price * x.qty, 0) * 100) / 100, items, finalUrl: r.finalUrl };
     if (!items.length) { out.error = "no_items"; out.message = "لم نتمكن من قراءة منتجات السلة من هذا الرابط"; }
-    if (debug) { out.trail = trail; out.debug = debugInfo(r.body); }
+    if (debug) { out.trail = trail; out.landing = landing; out.debug = debugInfo(r.body); }
     return json(out);
   } catch (e) {
     return json({ ok: false, error: "fetch_failed", message: "تعذّر الوصول إلى SHEIN", detail: String(e && e.message || e), trail }, 502);
