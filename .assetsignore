@@ -1,0 +1,9 @@
+.git
+.github
+store
+wrangler.jsonc
+.assetsignore
+firestore.rules
+node_modules
+.wrangler
+*.md

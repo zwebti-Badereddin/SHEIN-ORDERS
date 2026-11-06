@@ -1,0 +1,11 @@
+// صفحة المتجر على Cloudflare Workers: ملفات ثابتة + /api/cart لقراءة سلة SHEIN
+{
+  "name": "sheinstore-ly",
+  "main": "worker.js",
+  "compatibility_date": "2026-10-01",
+  "assets": {
+    "directory": ".",
+    "binding": "ASSETS",
+    "run_worker_first": ["/api/*"]
+  }
+}

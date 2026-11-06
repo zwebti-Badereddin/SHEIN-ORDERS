@@ -1,0 +1,8 @@
+// تطبيق الطلبات على Cloudflare Workers: ملفات ثابتة فقط
+{
+  "name": "shein-orders",
+  "compatibility_date": "2026-10-01",
+  "assets": {
+    "directory": "."
+  }
+}
