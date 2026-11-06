@@ -108,7 +108,38 @@ async function discover(html) {
       found[u.split("/").pop()] = uniq((t.match(/["'`](\/(?:bff-api|api|h5)\/[^"'`\s]{3,160})["'`]/g) || []).map((x) => x.slice(1, -1)).filter((x) => /share|landing|group/i.test(x))).slice(0, 40);
     } catch (e) { found[u] = "fetch failed: " + e.message; }
   }
-  return { shareStrings, jsCount: allJs.length, chunkNames, candidates, apiInChunks: found,
+  // ملف runtime يحوي خريطة أسماء ملفات الصفحات: نبحث فيه عن ملفات صفحة مشاركة السلة ونقرؤها
+  const runtimeInfo = {};
+  const rt = allJs.find((u) => /\/runtime-[0-9a-f]+\.js/.test(u));
+  if (rt) {
+    try {
+      const t = await (await fetch(rt, { headers: { "user-agent": UA } })).text();
+      runtimeInfo.length = t.length;
+      const names = {}; let m; const re = /(\d+)\s*:\s*"([\w-]*(?:share|landing)[\w-]*)"/gi;
+      while ((m = re.exec(t))) names[m[1]] = m[2];
+      runtimeInfo.names = names;
+      const base = rt.slice(0, rt.lastIndexOf("/") + 1);
+      runtimeInfo.chunks = [];
+      for (const [id, name] of Object.entries(names).slice(0, 10)) {
+        const hm = t.match(new RegExp("[,{]\\s*" + id + "\\s*:\\s*\"([0-9a-f]{16,24})\"", "g")) || [];
+        for (const h of hm.slice(0, 3)) {
+          const hash = h.match(/"([0-9a-f]+)"/)[1];
+          for (const url of [base + name + "." + hash + ".js", base + name + "-" + hash + ".js"]) {
+            try {
+              const rr = await fetch(url, { headers: { "user-agent": UA } });
+              if (!rr.ok) { runtimeInfo.chunks.push({ url, status: rr.status }); continue; }
+              const ct = await rr.text();
+              runtimeInfo.chunks.push({ url, status: rr.status, length: ct.length,
+                apis: uniq((ct.match(/["'`](\/(?:bff-api|api|h5)\/[^"'`\s]{3,160})["'`]/g) || []).map((x) => x.slice(1, -1))).slice(0, 60),
+                around: (() => { const i = ct.search(/group_id/); return i < 0 ? "" : ct.slice(Math.max(0, i - 800), i + 800); })() });
+            } catch (e) { runtimeInfo.chunks.push({ url, error: e.message }); }
+          }
+        }
+      }
+      runtimeInfo.sample = (() => { const i = t.search(/share/i); return i < 0 ? "" : t.slice(Math.max(0, i - 400), i + 600); })();
+    } catch (e) { runtimeInfo.error = e.message; }
+  }
+  return { runtime: rt, runtimeInfo, jsCount: allJs.length, chunkNames, apiInChunks: found,
     manifestHint: (() => { const i = html.search(/resourceManiFest|_whenLoadChunkNameMap/); return i < 0 ? "" : html.slice(i, i + 3000); })() };
 }
 
