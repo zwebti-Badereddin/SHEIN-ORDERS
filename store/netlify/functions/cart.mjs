@@ -82,6 +82,10 @@ function debugInfo(html) {
     counts: Object.fromEntries(["goods_name", "goods_sn", "salePrice", "retailPrice", "shareInfo", "cartShare", "__NEXT_DATA__", "gbRawData", "captcha", "risk"].map((w) => [w, html.split(w).length - 1])),
     apiUrls: [...new Set((html.match(/["'](\/?(?:api|bff-api|h5)\/[^"'\s]{3,120})["']/g) || []).map((s) => s.slice(1, -1)))].slice(0, 40),
     goodsSnippets: around('"goods_name"'),
+    // صفحة appjump: نحتاج تعريف shareInfo ودالة toCartPage لنعرف أين تنتقل
+    shareInfoSnippet: (() => { const i = html.search(/shareInfo\s*=\s*[{J]/); return i < 0 ? "" : html.slice(i, i + 3000); })(),
+    toCartPage: (() => { const i = html.search(/function\s+toCartPage/); return i < 0 ? "" : html.slice(i, i + 2500); })(),
+    jumpHelpers: ["function getCurrentHost", "function getHost", "function toShowDetailPage", "function handleJumpDeeplink", "M_HOST", "PC_HOST", "localcountry"].map((w) => { const i = html.indexOf(w); return i < 0 ? null : { w, s: html.slice(Math.max(0, i - 200), i + 1200) }; }).filter(Boolean),
     globals: [...new Set((html.match(/window\.[A-Za-z_$][\w$]*\s*=/g) || []).map((x) => x.replace(/\s*=$/, "")))].slice(0, 40),
     scripts: (html.match(/<script[^>]+src=["'][^"']+["']/gi) || []).map((x) => x.replace(/^.*src=["']/i, "").replace(/["']$/, "")).slice(0, 20),
     head: html.slice(0, 2500),
